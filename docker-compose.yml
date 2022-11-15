@@ -1,0 +1,47 @@
+version: "3"
+services:
+  nodejs-express:
+    image: node:18.12.1
+    container_name: practice_web
+    ports:
+      - 127.0.0.1:8080:3000
+    environment:
+      NODE_ENV: development
+      NODE_PORT: 3000
+      DB_USER: db_user
+      DB_PASSWORD: db_password
+      DB_HOST: postgresdb
+      DB_PORT: 5432
+      DB_NAME: db_name
+      TZ: Asia/Tokyo
+    tty: true # コンテナの正常終了を阻止
+    depends_on:
+      - postgresdb
+    volumes:
+      - ./node:/var/src
+
+  postgresdb:
+    image: postgres:13.2
+    container_name: practice_db
+    ports:
+      - 127.0.0.1:5432:5432
+    environment:
+      POSTGRES_USER: db_user
+      POSTGRES_PASSWORD: db_password
+      POSTGRES_DB: db_name
+      TZ: "Asia/Tokyo"
+    volumes:
+      - ./db/data:/var/lib/postgresql/data # 初期起動の際は/db直下の/dataを削除
+
+  pgadmin4:
+    image: dpage/pgadmin4:6.15
+    container_name: practice_pgadmin
+    ports:
+      - 127.0.0.1:8888:80
+    volumes:
+      - ./pgadmin4:/var/lib/pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: pgadmin@email.jp
+      PGADMIN_DEFAULT_PASSWORD: pgadmin_password
+    depends_on:
+      - postgresdb
