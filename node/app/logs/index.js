@@ -1,3 +1,7 @@
+/**
+ * @module log
+ * @desc ログ管理
+ */
 const log4js = require('log4js');
 const { LOG } = require('config');
 
