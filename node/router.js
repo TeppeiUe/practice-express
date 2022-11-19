@@ -8,4 +8,8 @@ module.exports = app => {
   app.post('/user', controllers.user.create);
   app.get('/user/:id', controllers.user.show);
   app.get('/users', controllers.user.index);
+
+  app.post('/tweet', controllers.tweet.create);
+  app.get('/tweet/:id', controllers.tweet.show);
+  app.get('/tweets', controllers.tweet.index);
 };
