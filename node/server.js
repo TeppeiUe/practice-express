@@ -6,6 +6,9 @@ const app = express();
 const { WEB } = require('config');
 const log = require('./app/logs');
 
+app.use(express.json());
+require('./router')(app);
+
 app.listen(WEB.PORT, () => log.app.info(`Running at port: ${WEB.PORT}`));
 
 // db init
