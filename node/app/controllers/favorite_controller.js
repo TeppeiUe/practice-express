@@ -27,12 +27,51 @@ module.exports.create = async (req, res, next) => {
     }
   })
   .catch(err => {
-    log.app.error(err);
+    log.app.error(err.stack);
     return res.status(500).json({ message: 'system error' })
   });
 
   return res.json({ create: created ? 1 : 0 })
 };
+
+
+/**
+ * API: /user/:id/favorite, お気に入りツイート一覧
+ * @param {HttpRequest} req
+ * @param {HttpResponse} res
+ * @param {NextFunction} next
+ */
+module.exports.index = async (req, res, next) => {
+
+  const user_id = req.params.id;
+
+  const favorite = await models.user.findByPk(user_id, {
+    include: {
+      model: models.tweet,
+      as: 'active_favorite',
+      attributes: [
+        'id',
+        'message',
+        'user_id',
+        'created_at'
+      ],
+      include: {
+        model: models.user,
+        attributes: [
+          'id',
+          'user_name',
+          'image'
+        ]
+      }
+    },
+  })
+  .catch(err => {
+    log.app.error(err.stack);
+    return res.status(500).json({ message: 'system error' })
+  });
+
+  return res.json({ favorite })
+}
 
 
 /**

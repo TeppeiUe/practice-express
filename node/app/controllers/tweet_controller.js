@@ -36,14 +36,25 @@ module.exports.create = async (req, res, next) => {
 module.exports.show = async (req, res, next) => {
 
   const tweet = await models.tweet.findOne({
-    include: {
-      model: models.user,
-      attributes: [
-        'id',
-        'user_name',
-        'image'
-      ]
-    },
+    include: [
+      {
+        model: models.user,
+        attributes: [
+          'id',
+          'user_name',
+          'image'
+        ],
+      },
+      {
+        model: models.user,
+        as: 'passive_favorite',
+        attributes: [
+          'id',
+          'user_name',
+          'image'
+        ],
+      }
+    ],
     attributes: [
       'id',
       'message',
@@ -74,19 +85,34 @@ module.exports.show = async (req, res, next) => {
 module.exports.index = async (req, res, next) => {
 
   const tweets = await models.tweet.findAll({
-    include: {
-      model: models.user,
-      attributes: [
-        'id',
-        'user_name',
-        'image'
-      ]
-    },
+    include: [
+      {
+        model: models.user,
+        attributes: [
+          'id',
+          'user_name',
+          'image'
+        ]
+      },
+      {
+        model: models.user,
+        as: 'passive_favorite',
+        attributes: [
+          'id',
+          'user_name',
+          'image'
+        ]
+      }
+    ],
     attributes: [
       'id',
       'message',
+      'created_at',
       'created_at'
-    ]
+    ],
+    order: [
+      ['created_at', 'desc']
+    ],
   })
   .catch(err => {
     log.app.error(err.stack);

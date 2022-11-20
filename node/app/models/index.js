@@ -52,14 +52,18 @@ module.exports = {
     foreignKey: 'user_id'
   });
 
-  // m.user.belongsToMany(m.tweet, {
-  //   through: m.favorite,
-  //   as: 'active_favorite'
-  // });
-  // m.tweet.belongsToMany(m.user, {
-  //   through: m.favorite,
-  //   as: 'passive_favorite'
-  // });
+  m.user.belongsToMany(m.tweet, {
+    through: m.favorite,
+    as: 'active_favorite',
+    foreignKey: 'user_id',
+    otherKey: 'tweet_id',
+  });
+  m.tweet.belongsToMany(m.user, {
+    through: m.favorite,
+    as: 'passive_favorite',
+    foreignKey: 'tweet_id',
+    otherKey: 'user_id',
+  });
 
   m.user.belongsToMany(m.user, {
     through: m.relationship,

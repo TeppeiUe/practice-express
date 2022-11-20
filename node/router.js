@@ -9,6 +9,8 @@ module.exports = app => {
   app.get('/user/:id', controllers.user.show);
   app.get('/users', controllers.user.index);
 
+  app.get('/user/:id/favorite', controllers.favorite.index);
+
   app.post('/tweet', controllers.tweet.create);
   app.get('/tweet/:id', controllers.tweet.show);
   app.get('/tweets', controllers.tweet.index);
