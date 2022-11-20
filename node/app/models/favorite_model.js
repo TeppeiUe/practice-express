@@ -6,7 +6,7 @@
  */
 module.exports = (sequelize, DataTypes) => {
 
-  return sequelize.define('favorite', {
+  let favorite = sequelize.define('favorite', {
     user_id: {
       type: DataTypes.INTEGER,
       allowNull: false,
@@ -20,6 +20,10 @@ module.exports = (sequelize, DataTypes) => {
     underscored: true,
 
     timestamps: false,
-  })
+  });
+
+  favorite.removeAttribute('id');
+
+  return favorite
 
 };

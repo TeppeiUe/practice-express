@@ -1,5 +1,5 @@
 const models = require('../models');
-
+const log = require('../logs');
 
 /**
  * API: /user, ユーザー登録
