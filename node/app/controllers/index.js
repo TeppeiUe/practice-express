@@ -6,4 +6,5 @@ module.exports = {
   user: require('./user_controller'),
   tweet: require('./tweet_controller'),
   favorite: require('./favorite_controller'),
+  relation: require('./relationship_controller'),
 };

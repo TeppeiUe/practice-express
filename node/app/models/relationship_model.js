@@ -6,7 +6,7 @@
  */
 module.exports = (sequelize, DataTypes) => {
 
-  return sequelize.define('relationship', {
+  let relationship = sequelize.define('relationship', {
     following_id: {
       type: DataTypes.INTEGER,
       allowNull: false
@@ -21,5 +21,9 @@ module.exports = (sequelize, DataTypes) => {
 
     timestamps: false,
   })
+
+  relationship.removeAttribute('id');
+
+  return relationship
 
 };
