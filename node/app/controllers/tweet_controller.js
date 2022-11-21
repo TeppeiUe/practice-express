@@ -1,4 +1,4 @@
-const models = require('../models');
+const { sequelize, Sequelize, ...models } = require('../models');
 const log = require('../logs');
 
 
@@ -122,3 +122,46 @@ module.exports.index = async (req, res, next) => {
   return res.json({ tweets })
 
 };
+
+
+/**
+ * API: /tweet/:id (DELETE), ツイート削除
+ * @param {HttpRequest} req
+ * @param {HttpResponse} res
+ * @param {NextFunction} next
+ * @returns {ServerResponse} json
+ */
+module.exports.delete = async (req, res, next) => {
+
+  const { user_id } = req.body;
+
+  await sequelize.transaction(async t => {
+    const tweet = await models.tweet.findOne({
+      where: {
+        [Sequelize.Op.and]: [
+          { id: req.params.id },
+          { user_id }
+        ]
+      }
+    }, {
+      transaction: t
+    })
+
+    await models.favorite.destroy({
+      where: { tweet_id: req.params.id }
+    }, {
+      transaction: t
+    })
+
+    await tweet.destroy({
+    }, {
+      transaction: t
+    })
+  })
+  .catch(err => {
+    log.app.error(err.stack);
+    return res.status(500).json({ message: 'system error' })
+  });
+
+  return res.json({ delete: 1 })
+}

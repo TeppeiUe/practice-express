@@ -18,6 +18,7 @@ module.exports = app => {
 
   app.post('/tweet', controllers.tweet.create);
   app.get('/tweet/:id', controllers.tweet.show);
+  app.delete('/tweet/:id', controllers.tweet.delete);
   app.get('/tweets', controllers.tweet.index);
 
   app.post('/tweet/:id/favorite', controllers.favorite.create);
