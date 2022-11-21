@@ -10,6 +10,8 @@ module.exports = app => {
   app.get('/users', controllers.user.index);
 
   app.get('/user/:id/favorite', controllers.favorite.index);
+  app.get('/user/:id/follow', controllers.relation.follow);
+  app.get('/user/:id/follower', controllers.relation.follower);
   app.post('/user/:id/follow', controllers.relation.create);
   app.delete('/user/:id/follow', controllers.relation.delete);
 

@@ -7,7 +7,7 @@
 module.exports = (sequelize, DataTypes) => {
 
   let relationship = sequelize.define('relationship', {
-    following_id: {
+    follow_id: {
       type: DataTypes.INTEGER,
       allowNull: false
     },

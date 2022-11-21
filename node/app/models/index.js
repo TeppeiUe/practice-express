@@ -68,14 +68,14 @@ module.exports = {
   m.user.belongsToMany(m.user, {
     through: m.relationship,
     as: 'follow',
-    foreignKey: 'following_id',
+    foreignKey: 'follow_id',
     otherKey: 'follower_id'
   });
   m.user.belongsToMany(m.user, {
     through: m.relationship,
     as: 'follower',
     foreignKey: 'follower_id',
-    otherKey: 'following_id'
+    otherKey: 'follow_id'
   });
 
 })(module.exports);
