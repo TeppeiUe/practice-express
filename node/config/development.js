@@ -1,6 +1,13 @@
 module.exports = {
   WEB: {
     PORT: process.env.NODE_PORT || 3000,
+    COOKIE: {
+      SECURE: true,
+      EXPIRES: {
+        UNIT: 'm',
+        VALUE: 30
+      }
+    },
   },
   DB: {
     DB_NAME: process.env.DB_NAME,

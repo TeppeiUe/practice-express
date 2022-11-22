@@ -5,6 +5,9 @@ const controllers = require('./app/controllers');
  * @param {Express} app
  */
 module.exports = app => {
+  app.post('/login', controllers.session.create);
+  app.delete('/logout', controllers.session.delete);
+
   app.post('/user', controllers.user.create);
   app.get('/user/:id', controllers.user.show);
   app.put('/user/:id', controllers.user.update);
