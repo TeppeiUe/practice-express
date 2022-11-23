@@ -72,6 +72,37 @@ module.exports.create = async (req, res, next) => {
 
 
 /**
+ * API: /session (POST), セッションチェック
+ * @param {HttpRequest} req
+ * @param {HttpResponse} res
+ * @param {NextFunction} next
+ * @returns {ServerResponse} json
+ */
+module.exports.search = async (req, res, next) => {
+
+  const user = await models.user.findByPk(req.current_user.id, {
+      include: {
+        model: models.tweet,
+        attributes: [
+          'id',
+          'message',
+          'created_at'
+        ],
+        order: [
+          ['created_at', 'desc']
+        ],
+    },
+  })
+  .catch(err => {
+    log.app.error(err.stack);
+    return res.status(500).json({ message: 'system error' })
+  });
+
+  return res.json({ user })
+};
+
+
+/**
  * API: /logout (DELETE), ログアウト
  * @param {HttpRequest} req
  * @param {HttpResponse} res

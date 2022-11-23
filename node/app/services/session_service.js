@@ -1,7 +1,7 @@
 const crypto = require('crypto');
 const moment = require('moment');
 const { WEB } = require('config');
-const { session } = require('../models');
+const models = require('../models');
 
 
 /**
@@ -22,7 +22,7 @@ module.exports.create = async (user_id, callback) => {
   const setting = WEB.COOKIE.EXPIRES;
   const expires = moment().add(setting.VALUE, setting.UNIT).toISOString();
 
-  await session.create({
+  await models.session.create({
       session_id,
       user_id,
       expires
@@ -34,13 +34,43 @@ module.exports.create = async (user_id, callback) => {
 
 
 /**
+ * 指定したsession_idよりユーザーを検索
+ * @param {number|string} session_id
+ * @param {callback} callback
+ */
+ module.exports.search = async (session_id, callback) => {
+
+  const session = await models.session.findByPk(session_id)
+  .catch(err => callback(null, err));
+
+  if (session) {
+    const setting = WEB.COOKIE.EXPIRES;
+    const expires = moment().add(setting.VALUE, setting.UNIT);
+
+    await session.update({ expires })
+    .catch(err => callback(null, err));
+
+    return callback({
+      user_id: session.user_id,
+      ...{ expires }
+    }, null)
+
+  } else {
+    return callback(null, null)
+
+  }
+
+};
+
+
+/**
  * 指定したsession_idを削除
  * @param {number|string} session_id
  * @param {any} callback
  */
  module.exports.delete = async (session_id, callback) => {
 
-  await session.destroy({
+  await models.session.destroy({
     where: { session_id }
   })
   .catch(err => callback(err));

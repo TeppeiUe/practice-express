@@ -7,6 +7,7 @@ const controllers = require('./app/controllers');
 module.exports = app => {
   app.post('/login', controllers.session.create);
   app.delete('/logout', controllers.session.delete);
+  app.post('/session', controllers.session.search);
 
   app.post('/user', controllers.user.create);
   app.get('/user/:id', controllers.user.show);

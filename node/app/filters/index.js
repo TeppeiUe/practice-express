@@ -1,0 +1,7 @@
+/**
+ * @module filter
+ * @desc フィルター管理
+ */
+ module.exports = {
+  request: require('./request_validator'),
+}

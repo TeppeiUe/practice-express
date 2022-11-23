@@ -6,11 +6,13 @@ const app = express();
 const { WEB } = require('config');
 const log = require('./app/logs');
 const cookieParser = require('cookie-parser');
-
+const { request } = require('./app/filters');
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
+
+app.use(request.cookie_check);
 require('./router')(app);
 
 app.listen(WEB.PORT, () => log.app.info(`Running at port: ${WEB.PORT}`));
