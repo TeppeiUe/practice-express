@@ -1,5 +1,6 @@
 const { sequelize, Sequelize, ...models } = require('../models');
 const log = require('../logs');
+const { tweet_validator } = require('../filters');
 
 
 /**
@@ -11,17 +12,26 @@ const log = require('../logs');
  */
 module.exports.create = async (req, res, next) => {
 
-  const { message, user_id } = req.body;
-  const tweet = await models.tweet.create({
-    message,
-    user_id
-  })
-  .catch(err => {
-    log.app.error(err.stack);
-    return res.status(500).json({ message: 'system error' })
-  });
+  const callback = {
+    success: async obj => {
+      const tweet = await models.tweet.create(obj)
+      .catch(err => {
+        log.app.error(err.stack);
+        return res.status(500).json({ message: 'system error' })
+      });
 
-  return res.json({ tweet })
+      return res.json({ tweet })
+
+    },
+    failure: msg_list => res.status(400).json({ message: msg_list }),
+    error: err => {
+      log.app.error(err.stack);
+      return res.status(500).json({ message: 'system error' })
+
+    },
+  };
+
+  tweet_validator.create(req, callback);
 
 };
 
@@ -35,42 +45,53 @@ module.exports.create = async (req, res, next) => {
  */
 module.exports.show = async (req, res, next) => {
 
-  const tweet = await models.tweet.findOne({
-    include: [
-      {
-        model: models.user,
+  const callback = {
+    success: async obj => {
+      const tweet = await models.tweet.findOne({
+        include: [
+          {
+            model: models.user,
+            attributes: [
+              'id',
+              'user_name',
+              'image'
+            ],
+          },
+          {
+            model: models.user,
+            as: 'passive_favorite',
+            attributes: [
+              'id',
+              'user_name',
+              'image'
+            ],
+          }
+        ],
         attributes: [
           'id',
-          'user_name',
-          'image'
+          'message',
+          'user_id',
+          'created_at'
         ],
-      },
-      {
-        model: models.user,
-        as: 'passive_favorite',
-        attributes: [
-          'id',
-          'user_name',
-          'image'
-        ],
-      }
-    ],
-    attributes: [
-      'id',
-      'message',
-      'user_id',
-      'created_at'
-    ],
-    where: {
-      id: req.params.id
-    },
-  })
-  .catch(err => {
-    log.app.error(err.stack);
-    return res.status(500).json({ message: 'system error' })
-  });
+        where: obj,
+      })
+      .catch(err => {
+        log.app.error(err.stack);
+        return res.status(500).json({ message: 'system error' })
+      });
 
-  return res.json({ tweet })
+      return res.json({ tweet })
+
+    },
+    failure: msg_list => res.status(400).json({ message: msg_list }),
+    error: err => {
+      log.app.error(err.stack);
+      return res.status(500).json({ message: 'system error' })
+
+    },
+  };
+
+  tweet_validator.show(req, callback);
 
 };
 
@@ -106,9 +127,9 @@ module.exports.index = async (req, res, next) => {
     ],
     attributes: [
       'id',
+      'user_id',
       'message',
       'created_at',
-      'created_at'
     ],
     order: [
       ['created_at', 'desc']
@@ -133,35 +154,48 @@ module.exports.index = async (req, res, next) => {
  */
 module.exports.delete = async (req, res, next) => {
 
-  const { user_id } = req.body;
+  const callback = {
+    success: async obj => {
+      console.log(obj);
+      const { tweet_id, user_id } = obj;
+      await sequelize.transaction(async t => {
+        const tweet = await models.tweet.findOne({
+          where: {
+            [Sequelize.Op.and]: [
+              { id: tweet_id },
+              { user_id }
+            ]
+          }
+        }, {
+          transaction: t
+        })
 
-  await sequelize.transaction(async t => {
-    const tweet = await models.tweet.findOne({
-      where: {
-        [Sequelize.Op.and]: [
-          { id: req.params.id },
-          { user_id }
-        ]
-      }
-    }, {
-      transaction: t
-    })
+        await models.favorite.destroy({
+          where: { tweet_id }
+        }, {
+          transaction: t
+        })
 
-    await models.favorite.destroy({
-      where: { tweet_id: req.params.id }
-    }, {
-      transaction: t
-    })
+        await tweet.destroy({
+        }, {
+          transaction: t
+        })
+      })
+      .catch(err => {
+        log.app.error(err.stack);
+        return res.status(500).json({ message: 'system error' })
+      });
 
-    await tweet.destroy({
-    }, {
-      transaction: t
-    })
-  })
-  .catch(err => {
-    log.app.error(err.stack);
-    return res.status(500).json({ message: 'system error' })
-  });
+      return res.status(204).end()
 
-  return res.json({ delete: 1 })
-}
+    },
+    failure: msg_list => res.status(400).json({ message: msg_list }),
+    error: err => {
+      log.app.error(err.stack);
+      return res.status(500).json({ message: 'system error' })
+    },
+  }
+
+  tweet_validator.delete(req, callback);
+
+};

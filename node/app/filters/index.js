@@ -4,4 +4,5 @@
  */
  module.exports = {
   request: require('./request_validator'),
+  tweet_validator: require('./tweet_validator'),
 }
