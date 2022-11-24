@@ -11,7 +11,7 @@ module.exports = app => {
 
   app.post('/user', controllers.user.create);
   app.get('/user/:id', controllers.user.show);
-  app.put('/user/:id', controllers.user.update);
+  app.put('/user', controllers.user.update);
   app.get('/users', controllers.user.index);
 
   app.get('/user/:id/favorite', controllers.favorite.index);

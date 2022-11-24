@@ -1,3 +1,6 @@
+const { user } = require('../models');
+
+
 /**
  * 未定義以外の空のチェック
  * @param {any} val
@@ -49,3 +52,29 @@ module.exports.is_string_within_range = (val, min, max) => {
  * @returns {boolean}
  */
 module.exports.is_mail_address = val => val === undefined ? false : val.match(/.+@.+\..+/);
+
+
+/**
+ * ユーザー名の存在チェック(unique検証)
+ * @param {string} user_name
+ * @returns {number|null} ユーザーIDかnullを返却
+ */
+module.exports.user_name_exist = async user_name => {
+  const res = await user.findOne({
+    where: { user_name }
+  });
+  return res ? res.id : null
+};
+
+
+/**
+ * メールアドレスの存在チェック(unique検証)
+ * @param {string} email
+ * @returns {number|null} ユーザーIDかnullを返却
+ */
+module.exports.email_exist = async email => {
+  const res = await user.findOne({
+    where: { email }
+  });
+  return res ? res.id : null
+};

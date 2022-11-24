@@ -11,11 +11,13 @@ const { WEB } = require('config');
  * @returns {ServerResponse} json
  */
 module.exports.cookie_check = (req, res, next) => {
+  const { path, method } = req;
 
-  log.access.info(`request url=[${req.path}] method=[${req.method}]`);
+  log.access.info(`request url=[${path}] method=[${method}]`);
 
-  if (req.method.toUpperCase() === 'GET' ||
-      req.path === '/login') {
+  if (method.toUpperCase() === 'GET' ||
+      (path === '/user' && method.toUpperCase() === 'POST') ||
+      path === '/login') {
     next();
     return null
 

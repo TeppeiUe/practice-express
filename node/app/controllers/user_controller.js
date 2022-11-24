@@ -1,5 +1,7 @@
 const models = require('../models');
 const log = require('../logs');
+const { user_validator } = require('../filters');
+
 
 /**
  * API: /user, ユーザー登録
@@ -10,19 +12,27 @@ const log = require('../logs');
  */
 module.exports.create = async (req, res, next) => {
 
-  const { user_name, email, password } = req.body;
+  const callback = {
+    success: async obj => {
+      const user = await models.user.create(obj)
+      .catch(err => {
+        log.app.error(err.stack);
+        return res.status(500).json({ message: 'system error' })
+      });
 
-  const user = await models.user.create({
-    user_name,
-    email,
-    password,
-  })
-  .catch(err => {
-    log.app.error(err.stack);
-    return res.status(500).json({ message: 'system error' })
-  });
+      return res.status(201).json({ user })
 
-  return res.json({ user })
+    },
+    failure: msg_list => res.status(400).json({ message: msg_list }),
+    error: err => {
+      log.app.error(err.stack);
+      return res.status(500).json({ message: 'system error' })
+
+    },
+  };
+
+  user_validator.create(req, callback);
+
 };
 
 
@@ -35,38 +45,51 @@ module.exports.create = async (req, res, next) => {
  */
 module.exports.show = async (req, res, next) => {
 
-  const user = await models.user.findByPk(req.params.id, {
-    include: {
-      model: models.tweet,
-      attributes: [
-        'id',
-        'message',
-        'created_at'
-      ],
-      order: [
-        ['created_at', 'desc']
-      ]
-    },
-    attributes: [
-      'id',
-      'user_name',
-      'image',
-      'profile',
-      'created_at'
-    ]
-  })
-  .catch(err => {
-    log.app.error(err.stack);
-    return res.status(500).json({ message: 'system error' })
-  });
+  const callback = {
+    success: async () => {
+      const user = await models.user.findByPk(req.params.id, {
+        include: {
+          model: models.tweet,
+          attributes: [
+            'id',
+            'message',
+            'created_at'
+          ],
+          order: [
+            ['created_at', 'desc']
+          ]
+        },
+        attributes: [
+          'id',
+          'user_name',
+          'image',
+          'profile',
+          'created_at'
+        ]
+      })
+      .catch(err => {
+        log.app.error(err.stack);
+        return res.status(500).json({ message: 'system error' })
+      });
 
-  return res.json({ user })
+      return res.json({ user })
+
+    },
+    failure: msg_list => res.status(400).json({ message: msg_list }),
+    error: err => {
+      log.app.error(err.stack);
+      return res.status(500).json({ message: 'system error' })
+
+    },
+  };
+
+  user_validator.show(req, callback);
 
 };
 
 
 /**
- * API: /user/:id (PUT), ユーザー情報更新
+ * API: /user (PUT), ユーザー情報更新
  * @param {HttpRequest} req
  * @param {HttpResponse} res
  * @param {NextFunction} next
@@ -74,25 +97,31 @@ module.exports.show = async (req, res, next) => {
  */
 module.exports.update = async (req, res, next) => {
 
-  const { user_name, profile, image } = req.body;
+  const callback = {
+    success: async obj => {
+      await models.user.update(
+        obj, {
+        where: {
+          id: req.current_user.id
+        },
+      })
+      .catch(err => {
+        log.app.error(err.stack);
+        return res.status(500).json({ message: 'system error' })
+      });
 
-  const [_, user] = await models.user.update({
-    user_name,
-    profile,
-    image,
-  }, {
-    where: {
-      id: req.params.id
+      return res.status(204).end()
+
     },
-    returning: true,
-    plain: true,
-  })
-  .catch(err => {
-    log.app.error(err);
-    return res.status(500).json({ message: 'system error' })
-  });
+    failure: msg_list => res.status(400).json({ message: msg_list }),
+    error: err => {
+      log.app.error(err.stack);
+      return res.status(500).json({ message: 'system error' })
 
-  return res.json(user)
+    },
+  };
+
+  user_validator.update(req, callback);
 
 };
 
