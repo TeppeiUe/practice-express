@@ -17,7 +17,9 @@ module.exports.cookie_check = (req, res, next) => {
 
   if (method.toUpperCase() === 'GET' ||
       (path === '/user' && method.toUpperCase() === 'POST') ||
-      path === '/login') {
+      path === '/login' ||
+      path === '/logout'
+  ) {
     next();
     return null
 

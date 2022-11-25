@@ -6,4 +6,5 @@
   request: require('./request_validator'),
   tweet_validator: require('./tweet_validator'),
   user_validator: require('./user_validator'),
+  session_validator: require('./session_validator'),
 }
