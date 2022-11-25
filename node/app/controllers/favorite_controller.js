@@ -1,6 +1,7 @@
 const models = require('../models');
 const { Op } = models.Sequelize;
 const log = require('../logs');
+const { favorite_validator } = require('../filters');
 
 
 /**
@@ -12,26 +13,38 @@ const log = require('../logs');
  */
 module.exports.create = async (req, res, next) => {
 
-  const { user_id, tweet_id } = req.body;
+  const callback = {
+    success: async ({ user_id, tweet_id }) => {
+      await models.favorite.findOrCreate({
+        where: {
+          [Op.and]: [
+            { user_id },
+            { tweet_id }
+          ]
+        },
+        defaults: {
+          user_id,
+          tweet_id
+        }
+      })
+      .catch(err => {
+        log.app.error(err.stack);
+        return res.status(500).json({ message: 'system error' })
+      });
 
-  const [_, created] = await models.favorite.findOrCreate({
-    where: {
-      [Op.and]: [
-        { user_id },
-        { tweet_id }
-      ]
+      return res.status(204).end()
+
     },
-    defaults: {
-      user_id,
-      tweet_id
-    }
-  })
-  .catch(err => {
-    log.app.error(err.stack);
-    return res.status(500).json({ message: 'system error' })
-  });
+    failure: msg_list => res.status(400).json({ message: msg_list }),
+    error: err => {
+      log.app.error(err.stack);
+      return res.status(500).json({ message: 'system error' })
 
-  return res.json({ create: created ? 1 : 0 })
+    },
+  };
+
+  favorite_validator.create(req, callback);
+
 };
 
 
@@ -43,34 +56,45 @@ module.exports.create = async (req, res, next) => {
  */
 module.exports.index = async (req, res, next) => {
 
-  const user_id = req.params.id;
+  const callback = {
+    success: async ({ id }) => {
+      const favorite = await models.user.findByPk(id, {
+        include: {
+          model: models.tweet,
+          as: 'active_favorite',
+          attributes: [
+            'id',
+            'message',
+            'user_id',
+            'created_at'
+          ],
+          include: {
+            model: models.user,
+            attributes: [
+              'id',
+              'user_name',
+              'image'
+            ]
+          }
+        },
+      })
+      .catch(err => {
+        log.app.error(err.stack);
+        return res.status(500).json({ message: 'system error' })
+      });
 
-  const favorite = await models.user.findByPk(user_id, {
-    include: {
-      model: models.tweet,
-      as: 'active_favorite',
-      attributes: [
-        'id',
-        'message',
-        'user_id',
-        'created_at'
-      ],
-      include: {
-        model: models.user,
-        attributes: [
-          'id',
-          'user_name',
-          'image'
-        ]
-      }
+      return res.json({ favorite })
     },
-  })
-  .catch(err => {
-    log.app.error(err.stack);
-    return res.status(500).json({ message: 'system error' })
-  });
+    failure: msg_list => res.status(400).json({ message: msg_list }),
+    error: err => {
+      log.app.error(err.stack);
+      return res.status(500).json({ message: 'system error' })
 
-  return res.json({ favorite })
+    },
+  };
+
+  favorite_validator.index(req, callback);
+
 }
 
 
@@ -83,20 +107,33 @@ module.exports.index = async (req, res, next) => {
  */
 module.exports.delete = async (req, res, next) => {
 
-  const { user_id, tweet_id } = req.body;
+  const callback = {
+    success: async ({ user_id, tweet_id }) => {
+      const favorite = await models.favorite.destroy({
+        where: {
+          [Op.and]: [
+            { user_id },
+            { tweet_id }
+          ]
+        }
+      })
+      .catch(err => {
+        log.app.error(err.stack);
+        return res.status(500).json({ message: 'system error' })
+      });
 
-  const favorite = await models.favorite.destroy({
-    where: {
-      [Op.and]: [
-        { user_id },
-        { tweet_id }
-      ]
-    }
-  })
-  .catch(err => {
-    log.app.error(err.stack);
-    return res.status(500).json({ message: 'system error' })
-  });
+      return favorite ? res.status(204).end() :
+        res.status(400).json({ message: ['favorite tweet is not found']})
 
-  return res.json({ delete: favorite })
+    },
+    failure: msg_list => res.status(400).json({ message: msg_list }),
+    error: err => {
+      log.app.error(err.stack);
+      return res.status(500).json({ message: 'system error' })
+
+    },
+  };
+
+  favorite_validator.delete(req, callback);
+
 };

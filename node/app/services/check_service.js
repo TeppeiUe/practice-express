@@ -1,4 +1,4 @@
-const { user } = require('../models');
+const { user, tweet } = require('../models');
 
 
 /**
@@ -78,3 +78,11 @@ module.exports.email_exist = async email => {
   });
   return res ? res.id : null
 };
+
+
+/**
+ * ツイートの存在チェック
+ * @param {string|number} id
+ * @returns {boolean}
+ */
+module.exports.tweet_exist = async id => !!(await tweet.findByPk(id));
