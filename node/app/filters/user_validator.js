@@ -110,16 +110,6 @@ module.exports.update = async (req, callback) => {
   let err_msg = [];
 
   try {
-    if (id === undefined) {
-      err_msg.push('user_id is undefined');
-    } else
-    if (check.is_empty(id)) {
-      err_msg.push('user_id is empty');
-    } else
-    if (!check.is_positive_integer(id)) {
-      err_msg.push('user_id is not positive integer');
-    }
-
     if (user_name === undefined) {
       err_msg.push('usr_name is undefined');
     } else
@@ -129,11 +119,8 @@ module.exports.update = async (req, callback) => {
     if (!check.is_string(user_name)) {
       err_msg.push('user_name is not string')
     } else
-    if (id !== undefined) {
-      const user_id = await check.user_name_exist(user_name);
-      if (user_id && user_id !== id) {
-        err_msg.push('user_name is already exist');
-      }
+    if ((await check.user_name_exist(user_name) || id) !== id) {
+      err_msg.push('user_name is already exist');
     }
 
     if (profile === undefined) {

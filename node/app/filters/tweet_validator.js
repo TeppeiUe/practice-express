@@ -9,7 +9,6 @@ const { check } = require('../services');
  module.exports.create = (req, callback) => {
 
   const { message } = req.body;
-  const user_id = req.current_user.id;
   let err_msg = [];
 
   try {
@@ -26,20 +25,13 @@ const { check } = require('../services');
       err_msg.push('message is out of range');
     }
 
-    if (user_id === undefined) {
-      err_msg.push('user_id is undefined');
-    } else
-    if (check.is_empty(user_id)) {
-      err_msg.push('user_id is empty');
-    } else
-    if (!check.is_positive_integer(user_id)) {
-      err_msg.push('user_id is not positive integer');
-    }
-
     if (err_msg.length) {
       callback.failure(err_msg);
     } else {
-      callback.success({ user_id, message });
+      callback.success({
+        user_id: req.current_user.id,
+        ...{ message }
+      });
     }
 
   } catch (err) {
@@ -93,7 +85,6 @@ const { check } = require('../services');
  module.exports.delete = (req, callback) => {
 
   const tweet_id = req.params.id;
-  const user_id = req.current_user.id;
   let err_msg = [];
 
   try {
@@ -101,26 +92,19 @@ const { check } = require('../services');
       err_msAg.push('tweet_id is undefined');
     } else
     if (check.is_empty(tweet_id)) {
-      err_msg.push('user_id is empty');
+      err_msg.push('tweet_id is empty');
     } else
     if (!check.is_positive_integer(tweet_id)) {
-      err_msg.push('user_id is not positive integer');
-    }
-
-    if (user_id === undefined) {
-      err_msg.push('user_id is undefined');
-    } else
-    if (check.is_empty(user_id)) {
-      err_msg.push('user_id is empty');
-    } else
-    if (!check.is_positive_integer(user_id)) {
-      err_msg.push('user_id is not positive integer');
+      err_msg.push('tweet_id is not positive integer');
     }
 
     if (err_msg.length) {
       callback.failure(err_msg);
     } else {
-      callback.success({ user_id, tweet_id });
+      callback.success({
+        user_id: req.current_user.id,
+        ...{ tweet_id }
+      });
     }
 
   } catch (err) {

@@ -9,20 +9,9 @@ const { check } = require('../services');
  module.exports.create = async (req, callback) => {
 
   const tweet_id = req.params.id;
-  const user_id = req.current_user.id;
   let err_msg = [];
 
   try {
-    if (user_id === undefined) {
-      err_msg.push('user_id is undefined');
-    } else
-    if (check.is_empty(user_id)) {
-      err_msg.push('user_id is empty');
-    } else
-    if (!check.is_positive_integer(user_id)) {
-      err_msg.push('user_id is not positive integer');
-    }
-
     if (tweet_id === undefined) {
       err_msg.push('tweet_id is undefined');
     } else
@@ -39,7 +28,10 @@ const { check } = require('../services');
     if (err_msg.length) {
       callback.failure(err_msg);
     } else {
-      callback.success({ user_id, tweet_id });
+      callback.success({
+        user_id: req.current_user.id,
+        ...{ tweet_id }
+      });
     }
 
   } catch (err) {
@@ -93,20 +85,9 @@ const { check } = require('../services');
  module.exports.delete = (req, callback) => {
 
   const tweet_id = req.params.id;
-  const user_id = req.current_user.id;
   let err_msg = [];
 
   try {
-    if (user_id === undefined) {
-      err_msg.push('user_id is undefined');
-    } else
-    if (check.is_empty(user_id)) {
-      err_msg.push('user_id is empty');
-    } else
-    if (!check.is_positive_integer(user_id)) {
-      err_msg.push('user_id is not positive integer');
-    }
-
     if (tweet_id === undefined) {
       err_msg.push('tweet_id is undefined');
     } else
@@ -120,7 +101,10 @@ const { check } = require('../services');
     if (err_msg.length) {
       callback.failure(err_msg);
     } else {
-      callback.success({ user_id, tweet_id });
+      callback.success({
+        user_id: req.current_user.id,
+        ...{ tweet_id }
+      });
     }
 
   } catch (err) {

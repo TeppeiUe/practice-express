@@ -29,16 +29,6 @@ const { check } = require('../services');
       err_msg.push('user is not found');
     }
 
-    if (user_id === undefined) {
-      err_msg.push('user_id is undefined');
-    } else
-    if (check.is_empty(user_id)) {
-      err_msg.push('user_id is empty');
-    } else
-    if (!check.is_positive_integer(user_id)) {
-      err_msg.push('user_id is not positive integer');
-    }
-
     if (err_msg.length) {
       callback.failure(err_msg);
     } else {
@@ -96,7 +86,6 @@ const { check } = require('../services');
  module.exports.delete = async (req, callback) => {
 
   const follow_id = req.params.id; // フォロー削除する相手
-  const user_id = req.current_user.id; // 自分
   let err_msg = [];
 
   try {
@@ -110,20 +99,13 @@ const { check } = require('../services');
       err_msg.push('follow_id is not positive integer');
     }
 
-    if (user_id === undefined) {
-      err_msg.push('user_id is undefined');
-    } else
-    if (check.is_empty(user_id)) {
-      err_msg.push('user_id is empty');
-    } else
-    if (!check.is_positive_integer(user_id)) {
-      err_msg.push('user_id is not positive integer');
-    }
-
     if (err_msg.length) {
       callback.failure(err_msg);
     } else {
-      callback.success({ follow_id, user_id });
+      callback.success({
+        ...{ follow_id },
+        user_id: req.current_user.id
+      });
     }
 
   } catch (err) {
