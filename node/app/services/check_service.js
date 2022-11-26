@@ -55,6 +55,14 @@ module.exports.is_mail_address = val => val === undefined ? false : val.match(/.
 
 
 /**
+ * ユーザーの存在チェック
+ * @param {number|string} id
+ * @returns {boolean}
+ */
+module.exports.user_exist = async id => !!(await user.findByPk(id));
+
+
+/**
  * ユーザー名の存在チェック(unique検証)
  * @param {string} user_name
  * @returns {number|null} ユーザーIDかnullを返却

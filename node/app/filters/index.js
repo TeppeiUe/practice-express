@@ -8,4 +8,5 @@
   user_validator: require('./user_validator'),
   session_validator: require('./session_validator'),
   favorite_validator: require('./favorite_validator'),
+  relation_validator: require('./relationship_validator'),
 }
