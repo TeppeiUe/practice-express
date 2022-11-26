@@ -49,7 +49,7 @@ module.exports.create = async (req, res, next) => {
 
 
 /**
- * API: /user/:id/favorite, お気に入りツイート一覧
+ * API: /user/:id/favorites, お気に入りツイート一覧
  * @param {HttpRequest} req
  * @param {HttpResponse} res
  * @param {NextFunction} next

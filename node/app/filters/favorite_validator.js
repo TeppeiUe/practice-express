@@ -43,7 +43,7 @@ const { check } = require('../services');
 
 
 /**
- * API: /user/:id/favorite , お気に入りツイート一覧
+ * API: /user/:id/favorites , お気に入りツイート一覧
  * @param {HttpRequest} req
  * @param {callback} callback
  */

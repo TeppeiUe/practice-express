@@ -14,7 +14,7 @@ module.exports = app => {
   app.put('/user', controllers.user.update);
   app.get('/users', controllers.user.index);
 
-  app.get('/user/:id/favorite', controllers.favorite.index);
+  app.get('/user/:id/favorites', controllers.favorite.index);
   app.get('/user/:id/followings', controllers.relation.followings);
   app.get('/user/:id/followers', controllers.relation.followers);
   app.post('/user/:id/following', controllers.relation.create);
