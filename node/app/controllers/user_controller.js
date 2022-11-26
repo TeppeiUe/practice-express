@@ -1,6 +1,8 @@
 const models = require('../models');
 const log = require('../logs');
 const { user_validator } = require('../filters');
+const { session } = require('../services');
+const { WEB } = require('config');
 
 
 /**
@@ -20,8 +22,28 @@ module.exports.create = async (req, res, next) => {
         return res.status(500).json({ message: 'system error' })
       });
 
-      return res.status(201).json({ user })
+      if (user) {
+        await session.create(user.id, async (ret, err) => {
+          if (err) {
+            log.app.error(err);
+            return res.status(500).json({ message: 'system error' })
 
+          } else {
+            const { session_id, expires } = ret;
+
+            res.cookie('session_id', session_id, {
+              expires: new Date(expires),
+              httpOnly: WEB.COOKIE.SECURE
+            });
+
+            return res.status(201).json({ user })
+          }
+
+        })
+      } else {
+        return res.status(400).json({ message: ['signup failure'] })
+
+      }
     },
     failure: msg_list => res.status(400).json({ message: msg_list }),
     error: err => {

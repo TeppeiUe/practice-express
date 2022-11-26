@@ -49,7 +49,7 @@ module.exports.create = async (req, res, next) => {
       });
 
       if (user) {
-        return session.create(user.id, async (ret, err) => {
+        await session.create(user.id, async (ret, err) => {
 
           if (err) {
             log.app.error(err);
