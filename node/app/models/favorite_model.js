@@ -19,7 +19,8 @@ module.exports = (sequelize, DataTypes) => {
     freezeTableName: true,
     underscored: true,
 
-    timestamps: false,
+    updatedAt: false,
+    createdAt: 'created_at',
   });
 
   favorite.removeAttribute('id');
