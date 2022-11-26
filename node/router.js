@@ -15,10 +15,10 @@ module.exports = app => {
   app.get('/users', controllers.user.index);
 
   app.get('/user/:id/favorite', controllers.favorite.index);
-  app.get('/user/:id/follow', controllers.relation.follow);
-  app.get('/user/:id/follower', controllers.relation.follower);
-  app.post('/user/:id/follow', controllers.relation.create);
-  app.delete('/user/:id/follow', controllers.relation.delete);
+  app.get('/user/:id/followings', controllers.relation.followings);
+  app.get('/user/:id/followers', controllers.relation.followers);
+  app.post('/user/:id/following', controllers.relation.create);
+  app.delete('/user/:id/following', controllers.relation.delete);
 
   app.post('/tweet', controllers.tweet.create);
   app.get('/tweet/:id', controllers.tweet.show);

@@ -2,14 +2,14 @@ const { check } = require('../services');
 
 
 /**
- * API: /user/:id/follow (POST), フォロー
+ * API: /user/:id/following (POST), フォロー
  * @param {HttpRequest} req
  * @param {callback} callback
  */
  module.exports.create = async (req, callback) => {
 
   const follow_id = req.params.id; // フォローする相手
-  const follower_id = req.current_user.id; // 自分
+  const user_id = req.current_user.id; // 自分
   let err_msg = [];
 
   try {
@@ -22,28 +22,27 @@ const { check } = require('../services');
     if (!check.is_positive_integer(follow_id)) {
       err_msg.push('follow_id is not positive integer');
     } else
+    if (Number(follow_id) === user_id) {
+      err_msg.push('prohibit same user follow');
+    } else
     if (!(await check.user_exist(follow_id))) {
       err_msg.push('user is not found');
     }
 
-    if (follower_id === undefined) {
-      err_msg.push('follower_id is undefined');
+    if (user_id === undefined) {
+      err_msg.push('user_id is undefined');
     } else
-    if (check.is_empty(follower_id)) {
-      err_msg.push('follower_id is empty');
+    if (check.is_empty(user_id)) {
+      err_msg.push('user_id is empty');
     } else
-    if (!check.is_positive_integer(follower_id)) {
-      err_msg.push('follower_id is not positive integer');
-    }
-
-    if (Number(follow_id) === Number(follower_id)) {
-      err_msg.push('prohibit same user follow');
+    if (!check.is_positive_integer(user_id)) {
+      err_msg.push('user_id is not positive integer');
     }
 
     if (err_msg.length) {
       callback.failure(err_msg);
     } else {
-      callback.success({ follow_id, follower_id });
+      callback.success({ follow_id, user_id });
     }
 
   } catch (err) {
@@ -55,7 +54,7 @@ const { check } = require('../services');
 
 
 /**
- * API: /user/:id/(follow, follower), (フォロー, フォロワー)一覧
+ * API: /user/:id/(followings, followers), (フォロー, フォロワー)一覧
  * @param {HttpRequest} req
  * @param {callback} callback
  */
@@ -90,14 +89,14 @@ const { check } = require('../services');
 
 
 /**
- * API: /user/:id/follow (DELETE), フォロー削除
+ * API: /user/:id/following (DELETE), フォロー削除
  * @param {HttpRequest} req
  * @param {callback} callback
  */
  module.exports.delete = async (req, callback) => {
 
   const follow_id = req.params.id; // フォロー削除する相手
-  const follower_id = req.current_user.id; // 自分
+  const user_id = req.current_user.id; // 自分
   let err_msg = [];
 
   try {
@@ -111,20 +110,20 @@ const { check } = require('../services');
       err_msg.push('follow_id is not positive integer');
     }
 
-    if (follower_id === undefined) {
-      err_msg.push('follower_id is undefined');
+    if (user_id === undefined) {
+      err_msg.push('user_id is undefined');
     } else
-    if (check.is_empty(follower_id)) {
-      err_msg.push('follower_id is empty');
+    if (check.is_empty(user_id)) {
+      err_msg.push('user_id is empty');
     } else
-    if (!check.is_positive_integer(follower_id)) {
-      err_msg.push('follower_id is not positive integer');
+    if (!check.is_positive_integer(user_id)) {
+      err_msg.push('user_id is not positive integer');
     }
 
     if (err_msg.length) {
       callback.failure(err_msg);
     } else {
-      callback.success({ follow_id, follower_id });
+      callback.success({ follow_id, user_id });
     }
 
   } catch (err) {

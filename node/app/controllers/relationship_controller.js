@@ -5,7 +5,7 @@ const { relation_validator } = require('../filters');
 
 
 /**
- * API: /user/:id/follow (POST), フォロー
+ * API: /user/:id/following (POST), フォロー
  * @param {HttpRequest} req
  * @param {HttpResponse} res
  * @param {NextFunction} next
@@ -14,17 +14,17 @@ const { relation_validator } = require('../filters');
 module.exports.create = async (req, res, next) => {
 
   const callback = {
-    success: async ({ follow_id, follower_id }) => {
+    success: async ({ follow_id, user_id }) => {
       const [_, created] = await models.relationship.findOrCreate({
         where: {
           [Op.and] : [
             { follow_id },
-            { follower_id }
+            { user_id }
           ]
         },
         defaults: {
           follow_id,
-          follower_id
+          user_id
         }
       })
       .catch(err => {
@@ -50,20 +50,20 @@ module.exports.create = async (req, res, next) => {
 
 
 /**
- * API: /user/:id/follow, フォロー一覧
+ * API: /user/:id/followings, フォロー一覧
  * @param {HttpRequest} req
  * @param {HttpResponse} res
  * @param {NextFunction} next
  * @returns {ServerResponse}
  */
-module.exports.follow = async (req, res, next) => {
+module.exports.followings = async (req, res, next) => {
 
   const callback = {
     success: async ({ id }) => {
-      const follow = await models.user.findByPk(id, {
+      const followings = await models.user.findByPk(id, {
         include: {
           model: models.user,
-          as: 'follow',
+          as: 'following',
           attributes: [
             'id',
             'user_name',
@@ -78,7 +78,7 @@ module.exports.follow = async (req, res, next) => {
         return res.status(500).json({ message: 'system error' })
       });
 
-      return res.json(follow)
+      return res.json(followings)
     },
     failure: msg_list => res.status(400).json({ message: msg_list }),
     error: err => {
@@ -94,17 +94,17 @@ module.exports.follow = async (req, res, next) => {
 
 
 /**
- * API: /user/:id/follower, フォロワー一覧
+ * API: /user/:id/followers, フォロワー一覧
  * @param {HttpRequest} req
  * @param {HttpResponse} res
  * @param {NextFunction} next
  * @returns {ServerResponse}
  */
-module.exports.follower = async (req, res, next) => {
+module.exports.followers = async (req, res, next) => {
 
   const callback = {
     success: async ({ id }) => {
-      const follower = await models.user.findByPk(id, {
+      const followers = await models.user.findByPk(id, {
         include: {
           model: models.user,
           as: 'follower',
@@ -122,7 +122,7 @@ module.exports.follower = async (req, res, next) => {
         return res.status(500).json({ message: 'system error' })
       });
 
-      return res.json(follower)
+      return res.json(followers)
 
     },
     failure: msg_list => res.status(400).json({ message: msg_list }),
@@ -139,7 +139,7 @@ module.exports.follower = async (req, res, next) => {
 
 
 /**
- * API: /user/:id/follow (DELETE), フォロー削除
+ * API: /user/:id/following (DELETE), フォロー削除
  * @param {HttpRequest} req
  * @param {HttpResponse} res
  * @param {NextFunction} next
@@ -148,12 +148,12 @@ module.exports.follower = async (req, res, next) => {
  module.exports.delete = async (req, res, next) => {
 
   const callback = {
-    success: async ({ follow_id, follower_id }) => {
-      const follow = await models.relationship.destroy({
+    success: async ({ follow_id, user_id }) => {
+      const following = await models.relationship.destroy({
         where: {
           [Op.and]: [
             { follow_id },
-            { follower_id }
+            { user_id }
           ]
         }
       })
@@ -162,7 +162,7 @@ module.exports.follower = async (req, res, next) => {
         return res.status(500).json({ message: 'system error' })
       });
 
-      return follow ? res.status(204).end() :
+      return following ? res.status(204).end() :
         res.status(400).json({ message: ['cannot delete'] })
     },
     failure: msg_list => res.status(400).json({ message: msg_list }),
