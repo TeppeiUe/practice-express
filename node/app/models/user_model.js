@@ -13,7 +13,7 @@ module.exports = (sequelize, DataTypes) => {
       autoIncrement: true
     },
     user_name: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(16),
       allowNull: false,
       unique: true,
       validate: { len: [1, 16] },

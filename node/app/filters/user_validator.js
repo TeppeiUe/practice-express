@@ -13,13 +13,16 @@ const { check } = require('../services');
 
   try {
     if (user_name === undefined) {
-        err_msg.push('usr_name is undefined');
+        err_msg.push('user_name is undefined');
     } else
     if (check.is_empty(user_name)) {
       err_msg.push('user_name is empty')
     } else
     if (!check.is_string(user_name)) {
       err_msg.push('user_name is not string');
+    } else
+    if (!check.is_string_within_range(user_name, 1, 16)) {
+      err_msg.push('message is out of range');
     } else
     if (await check.user_name_exist(user_name)) {
       err_msg.push('user_name is already exist');
@@ -119,6 +122,9 @@ module.exports.update = async (req, callback) => {
     if (!check.is_string(user_name)) {
       err_msg.push('user_name is not string')
     } else
+    if (!check.is_string_within_range(user_name, 1, 16)) {
+      err_msg.push('user_name is out of range');
+    } else
     if ((await check.user_name_exist(user_name) || id) !== id) {
       err_msg.push('user_name is already exist');
     }
@@ -128,6 +134,9 @@ module.exports.update = async (req, callback) => {
     } else
     if (!check.is_string(profile)) {
       err_msg.push('profile is not string');
+    } else
+    if (!check.is_string_within_range(profile, 1, 140)) {
+      err_msg.push('profile is out of range');
     }
 
     if (image === undefined) {
