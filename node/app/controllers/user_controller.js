@@ -18,25 +18,25 @@ module.exports.create = async (req, res, next) => {
       const user = await models.user.create(obj)
       .catch(err => {
         log.app.error(err.stack);
-        res.status(500).json({ message: ['system error'] })
+        res.status(500).json({ message: ['system error'] });
       });
 
       if (user) {
         await session.create(user.id, async (ret, err) => {
           if (err) {
             log.app.error(err);
-            res.status(500).json({ message: ['system error'] })
+            res.status(500).json({ message: ['system error'] });
 
           } else {
             const { session_id, expires } = ret;
-            const { id, user_name, image, profile, created_at, tweets } = user;
+            const { id, user_name, image, profile, created_at } = user;
 
             res.cookie('session_id', session_id, {
               expires: new Date(expires),
               httpOnly: WEB.COOKIE.SECURE
             });
 
-            res.location = '/user/' + user.id;
+            res.location('/user/' + id);
 
             res.status(201).json({
               user: {
@@ -55,14 +55,14 @@ module.exports.create = async (req, res, next) => {
 
         })
       } else {
-        res.status(400).json({ message: ['signup failure'] })
+        res.status(400).json({ message: ['signup failure'] });
 
       }
     },
     failure: msg_list => res.status(400).json({ message: msg_list }),
     error: err => {
       log.app.error(err.stack);
-      res.status(500).json({ message: ['system error'] })
+      res.status(500).json({ message: ['system error'] });
 
     },
   };
@@ -117,7 +117,7 @@ module.exports.show = async (req, res, next) => {
       })
       .catch(err => {
         log.app.error(err.stack);
-        res.status(500).json({ message: ['system error'] })
+        res.status(500).json({ message: ['system error'] });
       });
 
       const { id, user_name, image, profile, created_at, tweets } = user;
@@ -131,25 +131,20 @@ module.exports.show = async (req, res, next) => {
             profile,
             created_at
           },
-          tweets: tweets.map(tweet => {
-            const { id, user_id, message, created_at, passive_favorite } = tweet;
-            return {
+          tweets: tweets.map(
+            ({ id, user_id, message, created_at, passive_favorite }) => ({
               ...{
                 id,
                 user_id,
                 message,
                 created_at
               },
-              favorites: passive_favorite.map(favorite => {
-                const { id, user_name, image } = favorite;
-                return {
-                  id,
-                  user_name,
-                  image
-                }
-              }),
-            }
-          }),
+              favorites: passive_favorite.map(
+                ({ id, user_name, image }) =>
+                ({ id, user_name, image })
+              ),
+            })
+          ),
         },
       });
 
@@ -157,7 +152,7 @@ module.exports.show = async (req, res, next) => {
     failure: msg_list => res.status(400).json({ message: msg_list }),
     error: err => {
       log.app.error(err.stack);
-      res.status(500).json({ message: ['system error'] })
+      res.status(500).json({ message: ['system error'] });
 
     },
   };
@@ -185,16 +180,16 @@ module.exports.update = async (req, res, next) => {
       })
       .catch(err => {
         log.app.error(err.stack);
-        res.status(500).json({ message: ['system error'] })
+        res.status(500).json({ message: ['system error'] });
       });
 
-      res.status(204).end()
+      res.status(204).end();
 
     },
     failure: msg_list => res.status(400).json({ message: msg_list }),
     error: err => {
       log.app.error(err.stack);
-      res.status(500).json({ message: ['system error'] })
+      res.status(500).json({ message: ['system error'] });
 
     },
   };
@@ -226,9 +221,9 @@ module.exports.index = async (req, res, next) => {
   })
   .catch(err => {
     log.app.error(err.stack);
-    res.status(500).json({ message: ['system error'] })
+    res.status(500).json({ message: ['system error'] });
   });
 
-  res.json({ users })
+  res.json({ users });
 
 };
