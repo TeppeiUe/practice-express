@@ -11,7 +11,6 @@ const { session_validator } = require('../filters');
  * @param {HttpRequest} req
  * @param {HttpResponse} res
  * @param {NextFunction} next
- * @returns {ServerResponse} json
  */
 module.exports.create = async (req, res, next) => {
 
@@ -23,12 +22,25 @@ module.exports.create = async (req, res, next) => {
           model: models.tweet,
           attributes: [
             'id',
+            'user_id',
             'message',
             'created_at'
           ],
           order: [
             ['created_at', 'desc']
-          ]
+          ],
+          include: {
+            model: models.user,
+            as: 'passive_favorite',
+            attributes: [
+              'id',
+              'user_name',
+              'image'
+            ],
+            order: [
+              ['created_at', 'desc']
+            ],
+          },
         },
         where: {
           [Op.and]: [
@@ -39,13 +51,14 @@ module.exports.create = async (req, res, next) => {
         attributes: [
           'id',
           'user_name',
+          'image',
           'profile',
           'created_at'
         ]
       })
       .catch(err => {
         log.app.error(err.stack);
-        return res.status(500).json({ message: 'system error' })
+        res.status(500).json({ message: ['system error'] });
       });
 
       if (user) {
@@ -53,7 +66,7 @@ module.exports.create = async (req, res, next) => {
 
           if (err) {
             log.app.error(err);
-            return res.status(500).json({ message: 'system error' })
+            res.status(500).json({ message: ['system error'] });
 
           } else {
             const { session_id, expires } = ret;
@@ -63,19 +76,51 @@ module.exports.create = async (req, res, next) => {
               httpOnly: WEB.COOKIE.SECURE
             });
 
-            return res.json({ user })
+            const { id, user_name, image, profile, created_at, tweets } = user;
+
+            res.json({
+              user: {
+                ...{
+                  id,
+                  user_name,
+                  image,
+                  profile,
+                  created_at
+                },
+                tweets: tweets.map(tweet => {
+                  const { id, user_id, message, created_at, passive_favorite } = tweet;
+                  return {
+                    ...{
+                      id,
+                      user_id,
+                      message,
+                      created_at
+                    },
+                    favorites: passive_favorite.map(favorite => {
+                      const { id, user_name, image } = favorite;
+                      return {
+                        id,
+                        user_name,
+                        image
+                      }
+                    }),
+                  }
+                }),
+              },
+            });
+
           }
 
         })
       } else {
-        return res.status(401).json(null)
+        res.status(401).json({ message: ['user is not found'] });
 
       }
     },
     failure: msg_list => res.status(401).json({ message: msg_list }),
     error: err => {
       log.app.error(err.stack);
-      return res.status(500).json({ message: 'system error' })
+      res.status(500).json({ message: ['system error'] });
 
     },
   };
@@ -90,29 +135,84 @@ module.exports.create = async (req, res, next) => {
  * @param {HttpRequest} req
  * @param {HttpResponse} res
  * @param {NextFunction} next
- * @returns {ServerResponse} json
  */
 module.exports.search = async (req, res, next) => {
 
   const user = await models.user.findByPk(req.current_user.id, {
+    include: {
+      model: models.tweet,
+      attributes: [
+        'id',
+        'user_id',
+        'message',
+        'created_at'
+      ],
+      order: [
+        ['created_at', 'desc']
+      ],
       include: {
-        model: models.tweet,
+        model: models.user,
+        as: 'passive_favorite',
         attributes: [
           'id',
-          'message',
-          'created_at'
+          'user_name',
+          'image'
         ],
         order: [
           ['created_at', 'desc']
         ],
+      },
     },
+    attributes: [
+      'id',
+      'user_name',
+      'image',
+      'profile',
+      'created_at'
+    ],
   })
   .catch(err => {
     log.app.error(err.stack);
-    return res.status(500).json({ message: 'system error' })
+    res.status(500).json({ message: ['system error'] })
   });
 
-  return user ? res.json({ user }) : res.status(401).json(null)
+  if (user) {
+    const { id, user_name, image, profile, created_at, tweets } = user;
+
+    res.json({
+      user: {
+        ...{
+          id,
+          user_name,
+          image,
+          profile,
+          created_at
+        },
+        tweets: tweets.map(tweet => {
+          const { id, user_id, message, created_at, passive_favorite } = tweet;
+          return {
+            ...{
+              id,
+              user_id,
+              message,
+              created_at
+            },
+            favorites: passive_favorite.map(favorite => {
+              const { id, user_name, image } = favorite;
+              return {
+                id,
+                user_name,
+                image
+              }
+            }),
+          }
+        }),
+      },
+    });
+
+  } else {
+    res.status(401).json({ message: ['user is not found']});
+  }
 
 };
 
@@ -122,7 +222,6 @@ module.exports.search = async (req, res, next) => {
  * @param {HttpRequest} req
  * @param {HttpResponse} res
  * @param {NextFunction} next
- * @returns {ServerResponse} json
  */
 module.exports.delete = async (req, res, next) => {
 
@@ -131,11 +230,11 @@ module.exports.delete = async (req, res, next) => {
       await session.delete(req.cookies.session_id, ret => {
         if (ret) {
           log.app.error(ret);
-          return res.status(500).json({ message: 'system error' })
+          res.status(500).json({ message: ['system error'] });
 
         } else {
           res.clearCookie('session_id');
-          return res.status(204).end();
+          res.status(204).end();
 
         }
 
@@ -144,7 +243,7 @@ module.exports.delete = async (req, res, next) => {
     failure: msg_list => res.status(401).json({ message: msg_list }),
     error: err => {
       log.app.error(err.stack);
-      return res.status(500).json({ message: 'system error' })
+      res.status(500).json({ message: ['system error'] });
 
     },
   };
