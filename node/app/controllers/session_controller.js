@@ -15,8 +15,7 @@ const { session_validator } = require('../filters');
 module.exports.create = async (req, res, next) => {
 
   const callback = {
-    success: async obj => {
-      const { email, password } = obj;
+    success: async ({ email, password }) => {
       const user = await models.user.findOne({
         include: {
           model: models.tweet,
@@ -87,25 +86,21 @@ module.exports.create = async (req, res, next) => {
                   profile,
                   created_at
                 },
-                tweets: tweets.map(tweet => {
-                  const { id, user_id, message, created_at, passive_favorite } = tweet;
-                  return {
+                tweets: tweets.map(
+                  ({ id, user_id, message, created_at, passive_favorite }) =>
+                  ({
                     ...{
                       id,
                       user_id,
                       message,
                       created_at
                     },
-                    favorites: passive_favorite.map(favorite => {
-                      const { id, user_name, image } = favorite;
-                      return {
-                        id,
-                        user_name,
-                        image
-                      }
-                    }),
-                  }
-                }),
+                    favorites: passive_favorite.map(
+                      ({ id, user_name, image }) =>
+                      ({ id, user_name, image })
+                    ),
+                  })
+                ),
               },
             });
 
@@ -188,25 +183,20 @@ module.exports.search = async (req, res, next) => {
           profile,
           created_at
         },
-        tweets: tweets.map(tweet => {
-          const { id, user_id, message, created_at, passive_favorite } = tweet;
-          return {
+        tweets: tweets.map(
+          ({ id, user_id, message, created_at, passive_favorite }) => ({
             ...{
               id,
               user_id,
               message,
               created_at
             },
-            favorites: passive_favorite.map(favorite => {
-              const { id, user_name, image } = favorite;
-              return {
-                id,
-                user_name,
-                image
-              }
-            }),
-          }
-        }),
+            favorites: passive_favorite.map(
+              ({ id, user_name, image }) =>
+              ({ id, user_name, image })
+            ),
+          })
+        ),
       },
     });
 
