@@ -29,6 +29,15 @@ module.exports.create = async (req, res, next) => {
           ],
           include: {
             model: models.tweet,
+            include: {
+              model: models.user,
+              as: 'passive_favorite',
+              attributes: [
+                'id',
+                'user_name',
+                'image'
+              ],
+            },
           },
         },
         where: {
@@ -85,14 +94,25 @@ module.exports.create = async (req, res, next) => {
                 },
                 tweets: following.filter(({ tweets }) => tweets.length)
                   .reduce((arr, { id, user_name, image, tweets }) => [
-                    ...arr, ...tweets.map(tweet => ({
-                      tweet,
-                      ...{ id, user_name, image }
+                    ...arr, ...tweets.map(t => {
+                      return {
+                        tweet: {
+                          id: t.id,
+                          user_id: t.user_id,
+                          message: t.message,
+                          created_at: t.created_at,
+                          favorites: t.passive_favorite.map(u => ({
+                            id: u.id,
+                            user_name: u.user_name,
+                            image: u.image
+                          })),
+                        },
+                        ...{ id, user_name, image },
+                      }
                     })
-                  )], [])
+                  ], [])
                   .sort((p, c) =>
-                    p.tweet.created_at < c.tweet.created_at ? 1 : -1),
-              },
+                    p.tweet.created_at < c.tweet.created_at ? 1 : -1),              },
             });
 
           }
@@ -137,6 +157,15 @@ module.exports.search = async (req, res, next) => {
       ],
       include: {
         model: models.tweet,
+        include: {
+          model: models.user,
+          as: 'passive_favorite',
+          attributes: [
+            'id',
+            'user_name',
+            'image'
+          ],
+        },
       },
     },
     attributes: [
@@ -173,11 +202,23 @@ module.exports.search = async (req, res, next) => {
         },
         tweets: following.filter(({ tweets }) => tweets.length)
           .reduce((arr, { id, user_name, image, tweets }) => [
-            ...arr, ...tweets.map(tweet => ({
-              tweet,
-              ...{ id, user_name, image }
+            ...arr, ...tweets.map(t => {
+              return {
+                tweet: {
+                  id: t.id,
+                  user_id: t.user_id,
+                  message: t.message,
+                  created_at: t.created_at,
+                  favorites: t.passive_favorite.map(u => ({
+                    id: u.id,
+                    user_name: u.user_name,
+                    image: u.image
+                  })),
+                },
+                ...{ id, user_name, image },
+              }
             })
-          )], [])
+          ], [])
           .sort((p, c) =>
             p.tweet.created_at < c.tweet.created_at ? 1 : -1),
       },
