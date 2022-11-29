@@ -18,27 +18,17 @@ module.exports.create = async (req, res, next) => {
     success: async ({ email, password }) => {
       const user = await models.user.findOne({
         include: {
-          model: models.tweet,
+          model: models.user,
+          as: 'following',
           attributes: [
             'id',
-            'user_id',
-            'message',
+            'user_name',
+            'profile',
+            'image',
             'created_at'
           ],
-          order: [
-            ['created_at', 'desc']
-          ],
           include: {
-            model: models.user,
-            as: 'passive_favorite',
-            attributes: [
-              'id',
-              'user_name',
-              'image'
-            ],
-            order: [
-              ['created_at', 'desc']
-            ],
+            model: models.tweet,
           },
         },
         where: {
@@ -75,7 +65,14 @@ module.exports.create = async (req, res, next) => {
               httpOnly: WEB.COOKIE.SECURE
             });
 
-            const { id, user_name, image, profile, created_at, tweets } = user;
+            const {
+              id,
+              user_name,
+              image,
+              profile,
+              created_at,
+              following,
+            } = user;
 
             res.json({
               user: {
@@ -86,21 +83,15 @@ module.exports.create = async (req, res, next) => {
                   profile,
                   created_at
                 },
-                tweets: tweets.map(
-                  ({ id, user_id, message, created_at, passive_favorite }) =>
-                  ({
-                    ...{
-                      id,
-                      user_id,
-                      message,
-                      created_at
-                    },
-                    favorites: passive_favorite.map(
-                      ({ id, user_name, image }) =>
-                      ({ id, user_name, image })
-                    ),
-                  })
-                ),
+                tweets: following.filter(({ tweets }) => tweets.length)
+                  .reduce((arr, { id, user_name, image, tweets }) => [
+                    ...arr, ...tweets.map(tweet => ({
+                      tweet,
+                      ...{ id, user_name, image }
+                    })
+                  )], [])
+                  .sort((p, c) =>
+                    p.tweet.created_at < c.tweet.created_at ? 1 : -1),
               },
             });
 
@@ -135,27 +126,17 @@ module.exports.search = async (req, res, next) => {
 
   const user = await models.user.findByPk(req.current_user.id, {
     include: {
-      model: models.tweet,
+      model: models.user,
+      as: 'following',
       attributes: [
         'id',
-        'user_id',
-        'message',
+        'user_name',
+        'profile',
+        'image',
         'created_at'
       ],
-      order: [
-        ['created_at', 'desc']
-      ],
       include: {
-        model: models.user,
-        as: 'passive_favorite',
-        attributes: [
-          'id',
-          'user_name',
-          'image'
-        ],
-        order: [
-          ['created_at', 'desc']
-        ],
+        model: models.tweet,
       },
     },
     attributes: [
@@ -172,7 +153,14 @@ module.exports.search = async (req, res, next) => {
   });
 
   if (user) {
-    const { id, user_name, image, profile, created_at, tweets } = user;
+    const {
+      id,
+      user_name,
+      image,
+      profile,
+      created_at,
+      following,
+    } = user;
 
     res.json({
       user: {
@@ -183,20 +171,15 @@ module.exports.search = async (req, res, next) => {
           profile,
           created_at
         },
-        tweets: tweets.map(
-          ({ id, user_id, message, created_at, passive_favorite }) => ({
-            ...{
-              id,
-              user_id,
-              message,
-              created_at
-            },
-            favorites: passive_favorite.map(
-              ({ id, user_name, image }) =>
-              ({ id, user_name, image })
-            ),
-          })
-        ),
+        tweets: following.filter(({ tweets }) => tweets.length)
+          .reduce((arr, { id, user_name, image, tweets }) => [
+            ...arr, ...tweets.map(tweet => ({
+              tweet,
+              ...{ id, user_name, image }
+            })
+          )], [])
+          .sort((p, c) =>
+            p.tweet.created_at < c.tweet.created_at ? 1 : -1),
       },
     });
 
