@@ -9,7 +9,6 @@ const { relation_validator } = require('../filters');
  * @param {HttpRequest} req
  * @param {HttpResponse} res
  * @param {NextFunction} next
- * @returns {ServerResponse} json
  */
 module.exports.create = async (req, res, next) => {
 
@@ -29,17 +28,20 @@ module.exports.create = async (req, res, next) => {
       })
       .catch(err => {
         log.app.error(err);
-        return res.status(500).json({ message: 'system error' })
+        res.status(500).json({ message: ['system error'] });
       });
 
-      return created ? res.status(204).end() :
-        res.status(400).json({ message: ['already follow this user'] })
+      if (created) {
+        res.status(204).end();
+      } else {
+        res.status(400).json({ message: ['already follow this user'] });
+      }
 
     },
     failure: msg_list => res.status(400).json({ message: msg_list }),
     error: err => {
       log.app.error(err.stack);
-      return res.status(500).json({ message: 'system error' })
+      res.status(500).json({ message: ['system error'] });
 
     },
   };
@@ -54,13 +56,12 @@ module.exports.create = async (req, res, next) => {
  * @param {HttpRequest} req
  * @param {HttpResponse} res
  * @param {NextFunction} next
- * @returns {ServerResponse}
  */
 module.exports.followings = async (req, res, next) => {
 
   const callback = {
     success: async ({ id }) => {
-      const followings = await models.user.findByPk(id, {
+      const user = await models.user.findByPk(id, {
         include: {
           model: models.user,
           as: 'following',
@@ -68,22 +69,31 @@ module.exports.followings = async (req, res, next) => {
             'id',
             'user_name',
             'profile',
-            'image'
-          ]
+            'image',
+            'created_at'
+          ],
+          order: [
+            ['created_at', 'desc']
+          ],
         },
         attributes: []
       })
       .catch(err => {
         log.app.error(err);
-        return res.status(500).json({ message: 'system error' })
+        res.status(500).json({ message: ['system error'] });
       });
 
-      return res.json(followings)
+      res.json({
+        users: user.following.map(
+          ({ id, user_name, profile, image, created_at }) =>
+          ({ id, user_name, profile, image, created_at })
+        ),
+      });
     },
     failure: msg_list => res.status(400).json({ message: msg_list }),
     error: err => {
       log.app.error(err.stack);
-      return res.status(500).json({ message: 'system error' })
+      res.status(500).json({ message: ['system error'] });
 
     },
   };
@@ -98,13 +108,12 @@ module.exports.followings = async (req, res, next) => {
  * @param {HttpRequest} req
  * @param {HttpResponse} res
  * @param {NextFunction} next
- * @returns {ServerResponse}
  */
 module.exports.followers = async (req, res, next) => {
 
   const callback = {
     success: async ({ id }) => {
-      const followers = await models.user.findByPk(id, {
+      const user = await models.user.findByPk(id, {
         include: {
           model: models.user,
           as: 'follower',
@@ -112,23 +121,32 @@ module.exports.followers = async (req, res, next) => {
             'id',
             'user_name',
             'profile',
-            'image'
-          ]
+            'image',
+            'created_at'
+          ],
+          order: [
+            ['created_at', 'desc']
+          ],
         },
         attributes: [],
       })
       .catch(err => {
         log.app.error(err);
-        return res.status(500).json({ message: 'system error' })
+        res.status(500).json({ message: ['system error'] });
       });
 
-      return res.json(followers)
+      res.json({
+        users: user.follower.map(
+          ({ id, user_name, profile, image, created_at }) =>
+          ({ id, user_name, profile, image, created_at })
+        ),
+      });
 
     },
     failure: msg_list => res.status(400).json({ message: msg_list }),
     error: err => {
       log.app.error(err.stack);
-      return res.status(500).json({ message: 'system error' })
+      res.status(500).json({ message: ['system error'] });
 
     },
   };
@@ -143,7 +161,6 @@ module.exports.followers = async (req, res, next) => {
  * @param {HttpRequest} req
  * @param {HttpResponse} res
  * @param {NextFunction} next
- * @returns {ServerResponse} json
  */
  module.exports.delete = async (req, res, next) => {
 
@@ -159,16 +176,19 @@ module.exports.followers = async (req, res, next) => {
       })
       .catch(err => {
         log.app.error(err.stack);
-        return res.status(500).json({ message: 'system error' })
+        res.status(500).json({ message: ['system error'] });
       });
 
-      return following ? res.status(204).end() :
-        res.status(400).json({ message: ['cannot delete'] })
+      if (following) {
+        res.status(204).end();
+      } else {
+        res.status(400).json({ message: ['cannot delete'] });
+      }
     },
     failure: msg_list => res.status(400).json({ message: msg_list }),
     error: err => {
       log.app.error(err.stack);
-      return res.status(500).json({ message: 'system error' })
+      res.status(500).json({ message: ['system error'] });
 
     },
   };
