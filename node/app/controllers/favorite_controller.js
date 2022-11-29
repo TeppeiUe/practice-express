@@ -9,7 +9,6 @@ const { favorite_validator } = require('../filters');
  * @param {HttpRequest} req
  * @param {HttpResponse} res
  * @param {NextFunction} next
- * @returns {ServerResponse} json
  */
 module.exports.create = async (req, res, next) => {
 
@@ -29,16 +28,16 @@ module.exports.create = async (req, res, next) => {
       })
       .catch(err => {
         log.app.error(err.stack);
-        return res.status(500).json({ message: 'system error' })
+        res.status(500).json({ message: ['system error'] });
       });
 
-      return res.status(204).end()
+      res.status(204).end();
 
     },
     failure: msg_list => res.status(400).json({ message: msg_list }),
     error: err => {
       log.app.error(err.stack);
-      return res.status(500).json({ message: 'system error' })
+      res.status(500).json({ message: ['system error'] });
 
     },
   };
@@ -58,7 +57,7 @@ module.exports.index = async (req, res, next) => {
 
   const callback = {
     success: async ({ id }) => {
-      const favorite = await models.user.findByPk(id, {
+      const favorites = await models.user.findByPk(id, {
         include: {
           model: models.tweet,
           as: 'active_favorite',
@@ -68,27 +67,62 @@ module.exports.index = async (req, res, next) => {
             'user_id',
             'created_at'
           ],
-          include: {
-            model: models.user,
-            attributes: [
-              'id',
-              'user_name',
-              'image'
-            ]
-          }
+          order: [
+            ['created_at', 'desc']
+          ],
+          include: [
+            {
+              model: models.user,
+              attributes: [
+                'id',
+                'user_name',
+                'image'
+              ],
+            }, {
+              model: models.user,
+              as: 'passive_favorite',
+              attributes: [
+                'id',
+                'user_name',
+                'image'
+              ],
+              order: [
+                ['created_at', 'desc']
+              ],
+            },
+          ],
         },
       })
       .catch(err => {
         log.app.error(err.stack);
-        return res.status(500).json({ message: 'system error' })
+        res.status(500).json({ message: ['system error'] });
       });
 
-      return res.json({ favorite })
+      const { active_favorite } = favorites;
+
+      res.json({
+        tweets: active_favorite.map(
+          ({ id, user_id, message, created_at, user, passive_favorite }) => ({
+            ...{
+              id,
+              user_id,
+              message,
+              created_at,
+              user,
+            },
+            favorites: passive_favorite.map(
+              ({ id, user_name, image }) =>
+              ({ id, user_name, image })
+            ),
+          })
+        ),
+      });
+
     },
     failure: msg_list => res.status(400).json({ message: msg_list }),
     error: err => {
       log.app.error(err.stack);
-      return res.status(500).json({ message: 'system error' })
+      res.status(500).json({ message: ['system error'] });
 
     },
   };
@@ -103,7 +137,6 @@ module.exports.index = async (req, res, next) => {
  * @param {HttpRequest} req
  * @param {HttpResponse} res
  * @param {NextFunction} next
- * @returns {ServerResponse} json
  */
 module.exports.delete = async (req, res, next) => {
 
@@ -119,17 +152,20 @@ module.exports.delete = async (req, res, next) => {
       })
       .catch(err => {
         log.app.error(err.stack);
-        return res.status(500).json({ message: 'system error' })
+        res.status(500).json({ message: ['system error'] });
       });
 
-      return favorite ? res.status(204).end() :
-        res.status(400).json({ message: ['favorite tweet is not found']})
+      if (favorite) {
+        res.status(204).end();
+      } else {
+        res.status(400).json({ message: ['favorite tweet is not found']});
+      }
 
     },
     failure: msg_list => res.status(400).json({ message: msg_list }),
     error: err => {
       log.app.error(err.stack);
-      return res.status(500).json({ message: 'system error' })
+      res.status(500).json({ message: ['system error'] });
 
     },
   };
