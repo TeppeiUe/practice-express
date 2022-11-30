@@ -2,3 +2,5 @@
 /node/logger/
 /pgadmin4/*
 /db/*
+/node/public/*
+!/node/public/.gitkeep
