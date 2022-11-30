@@ -1,5 +1,5 @@
-const { check } = require('../services');
-
+const { check, crypto } = require('../services');
+const { WEB } = require('config');
 
 /**
  * API: /login (POST), ログイン
@@ -8,7 +8,7 @@ const { check } = require('../services');
  */
 module.exports.create = (req, callback) => {
 
-  const { email, password } = req.body;
+  let { email, password } = req.body;
   let err_msg = [];
 
   try {
@@ -35,6 +35,9 @@ module.exports.create = (req, callback) => {
     if (err_msg.length) {
       callback.failure(err_msg);
     } else {
+      if (WEB.PASSWORD.SECURE) {
+        password = crypto.getHash(password);
+      }
       callback.success({ email, password });
     }
 

@@ -1,4 +1,5 @@
-const { check } = require('../services');
+const { check, crypto } = require('../services');
+const { WEB } = require('config');
 
 
 /**
@@ -8,7 +9,7 @@ const { check } = require('../services');
  */
  module.exports.create = async (req, callback) => {
 
-  const { user_name, email, password } = req.body;
+  let { user_name, email, password } = req.body;
   let err_msg = [];
 
   try {
@@ -54,6 +55,9 @@ const { check } = require('../services');
     if (err_msg.length) {
       callback.failure(err_msg);
     } else {
+      if (WEB.PASSWORD.SECURE) {
+        password = crypto.getHash(password);
+      }
       callback.success({ user_name, email, password });
     }
 

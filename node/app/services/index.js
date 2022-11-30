@@ -5,4 +5,5 @@
 module.exports = {
   session: require('./session_service'),
   check: require('./check_service'),
+  crypto: require('./crypt_service'),
 }

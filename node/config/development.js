@@ -8,6 +8,10 @@ module.exports = {
         VALUE: 30
       }
     },
+    PASSWORD: {
+      SECURE: true,
+      SALT: 'practice',
+    }
   },
   DB: {
     DB_NAME: process.env.DB_NAME,
