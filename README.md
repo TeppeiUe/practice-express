@@ -52,8 +52,8 @@ $ docker-compose down
 ---
 
 ## 動作確認
-- 利用可能なAPIは、[DB設計](##設計情報)を参照
-- 登録情報の確認は、[DB管理ツール利用方法](##DB管理ツール利用方法)を参照
+- 利用可能なAPIは、[DB設計](#設計情報)を参照
+- 登録情報の確認は、[DB管理ツール利用方法](#db管理ツール利用方法)を参照
 
 ### curlを利用
 
@@ -90,8 +90,8 @@ ___
 ## 設計情報
 <img width="300" src="./assets/er.png">
 
-- [API設計](https://docs.google.com/spreadsheets/d/1dszmDHifASGQMDyBLVrZOB6KvdG3vVnUZawoQbB7GQo/edit?usp=sharing)
-- [DB設計](https://docs.google.com/spreadsheets/d/1MhOT3dtFqDXTU8DcI92KUJz8gfzLNuqZS16lS9t31Do/edit?usp=sharing)
+- [API設計](https://docs.google.com/spreadsheets/d/1dszmDHifASGQMDyBLVrZOB6KvdG3vVnUZawoQbB7GQo/edit?usp=sharing) (Google スプレッドシート)
+- [DB設計](https://docs.google.com/spreadsheets/d/1MhOT3dtFqDXTU8DcI92KUJz8gfzLNuqZS16lS9t31Do/edit?usp=sharing) (Google スプレッドシート)
 
 ___
 
@@ -101,15 +101,23 @@ ___
 #### 1. `localhost:8888`にアクセス
 
 #### 2. Email及びPasswordは以下の通り
-- pgadmin@email.jp
+- pgadmin[]()@email.jp
 - pgadmin_password
 
 #### 3. 新規サーバーを登録（赤枠は5の内容）
 <img width=250 src="./assets/pgadmin4-1.png">
 
 #### 4. 登録情報はおおよそ以下の図の通りで、Passwordは`db_password`
+<table>
+<tr>
+<td>
 <img width=250 src="./assets/pgadmin4-2.png">
+</td>
+<td>
 <img width=250 src="./assets/pgadmin4-3.png">
+</td>
+</tr>
+</table>
 
 #### 5. 対象のテーブルを選択し、3で参照した図で赤枠で囲まれたアイコン(View Data)を押下することで、内容の確認が可能
 ※テーブル群はサイドバーの以下パスに存在
