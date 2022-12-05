@@ -7,6 +7,7 @@ const { WEB } = require('config');
 const log = require('./app/logs');
 const cookieParser = require('cookie-parser');
 const { request } = require('./app/filters');
+const path = require('path');
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
