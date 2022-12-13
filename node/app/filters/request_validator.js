@@ -16,10 +16,10 @@ module.exports.cookie_check = async (req, res, next) => {
   log.access.info(`request url=[${path}] method=[${method}]`);
 
   if (method.toUpperCase() === 'GET' ||
+      method.toUpperCase() === 'OPTIONS' ||
       path === '/login' ||
       path === '/logout' ||
-      (path === '/user' && method.toUpperCase() === 'POST') ||
-      (path === '/user' && method.toUpperCase() === 'OPTIONS')
+      (path === '/user' && method.toUpperCase() === 'POST')
   ) {
     next();
     return null
