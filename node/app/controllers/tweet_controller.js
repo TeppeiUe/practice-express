@@ -20,33 +20,26 @@ module.exports.create = async (req, res, next) => {
           'message',
           'created_at'
         ],
-        include: {
-          model: models.user,
-          attributes: [
-            'id',
-            'user_name',
-            'image'
-          ],
-        },
       })
       .catch(err => {
         log.app.error(err.stack);
         res.status(500).json({ message: ['system error'] });
       });
 
-      const { id, user_id, message, created_at, user } = tweet;
+      const { id, user_id, message, created_at } = tweet;
 
       res.location('/tweet/' + id);
 
       res.status(201).json({
-        ...{
-          id,
-          user_id,
-          message,
-          created_at,
-          user,
-        },
-        favorites: [],
+        tweet: {
+          ...{
+            id,
+            user_id,
+            message,
+            created_at,
+          },
+          favorites: [],
+        }
       });
 
     },
