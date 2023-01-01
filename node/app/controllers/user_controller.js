@@ -48,6 +48,7 @@ module.exports.create = async (req, res, next) => {
                   created_at
                 },
                 tweets: [],
+                favorites: [],
               },
             });
 
@@ -100,7 +101,8 @@ module.exports.show = async (req, res, next) => {
             attributes: [
               'id',
               'user_name',
-              'image'
+              'image',
+              'profile'
             ],
             order: [
               ['created_at', 'desc']
@@ -140,8 +142,8 @@ module.exports.show = async (req, res, next) => {
                 created_at
               },
               favorites: passive_favorite.map(
-                ({ id, user_name, image }) =>
-                ({ id, user_name, image })
+                ({ id, user_name, image, profile }) =>
+                ({ id, user_name, image, profile })
               ),
             })
           ),

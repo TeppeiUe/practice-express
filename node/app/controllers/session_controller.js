@@ -36,7 +36,8 @@ module.exports.create = async (req, res, next) => {
                 attributes: [
                   'id',
                   'user_name',
-                  'image'
+                  'image',
+                  'profile'
                 ],
               },
             },
@@ -49,7 +50,8 @@ module.exports.create = async (req, res, next) => {
               attributes: [
                 'id',
                 'user_name',
-                'image'
+                'image',
+                'profile'
               ],
             },
             attributes: [
@@ -112,9 +114,10 @@ module.exports.create = async (req, res, next) => {
                 favorites: t.passive_favorite.map(u => ({
                   id: u.id,
                   user_name: u.user_name,
-                  image: u.image
+                  image: u.image,
+                  profile: u.profile
                 })),
-                user: { id, user_name, image },
+                user: { id, user_name, image, profile },
               }
             ], []);
 
@@ -138,9 +141,10 @@ module.exports.create = async (req, res, next) => {
                         favorites: t.passive_favorite.map(u => ({
                           id: u.id,
                           user_name: u.user_name,
-                          image: u.image
+                          image: u.image,
+                          profile: u.profile
                         })),
-                        user: { id, user_name, image },
+                        user: { id, user_name, image, profile },
                       }
                     })
                   ], user_tweets)
@@ -197,7 +201,8 @@ module.exports.search = async (req, res, next) => {
             attributes: [
               'id',
               'user_name',
-              'image'
+              'image',
+              'profile'
             ],
           },
         },
@@ -210,7 +215,8 @@ module.exports.search = async (req, res, next) => {
           attributes: [
             'id',
             'user_name',
-            'image'
+            'image',
+            'profile'
           ],
         },
         attributes: [
@@ -253,9 +259,10 @@ module.exports.search = async (req, res, next) => {
         favorites: t.passive_favorite.map(u => ({
           id: u.id,
           user_name: u.user_name,
-          image: u.image
+          image: u.image,
+          profile: u.profile
         })),
-        user: { id, user_name, image },
+        user: { id, user_name, image, profile },
       }
     ], []);
 
@@ -279,9 +286,10 @@ module.exports.search = async (req, res, next) => {
                 favorites: t.passive_favorite.map(u => ({
                   id: u.id,
                   user_name: u.user_name,
-                  image: u.image
+                  image: u.image,
+                  profile: u.profile
                 })),
-                user: { id, user_name, image },
+                user: { id, user_name, image, profile },
               }
             })
           ], user_tweets)

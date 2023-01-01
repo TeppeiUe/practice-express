@@ -76,7 +76,8 @@ module.exports.index = async (req, res, next) => {
               attributes: [
                 'id',
                 'user_name',
-                'image'
+                'image',
+                'profile'
               ],
             }, {
               model: models.user,
@@ -84,7 +85,8 @@ module.exports.index = async (req, res, next) => {
               attributes: [
                 'id',
                 'user_name',
-                'image'
+                'image',
+                'profile'
               ],
               order: [
                 ['created_at', 'desc']
@@ -111,8 +113,8 @@ module.exports.index = async (req, res, next) => {
               user,
             },
             favorites: passive_favorite.map(
-              ({ id, user_name, image }) =>
-              ({ id, user_name, image })
+              ({ id, user_name, image, profile }) =>
+              ({ id, user_name, image, profile })
             ),
           })
         ),
