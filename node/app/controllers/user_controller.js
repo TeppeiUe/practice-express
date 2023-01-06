@@ -146,7 +146,7 @@ module.exports.show = async (req, res, next) => {
                 ({ id, user_name, image, profile })
               ),
             })
-          ),
+          ).sort((p, c) => p.created_at < c.created_at ? 1 : -1),
         },
       });
 
