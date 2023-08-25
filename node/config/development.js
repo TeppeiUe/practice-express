@@ -1,6 +1,7 @@
 module.exports = {
   WEB: {
     PORT: process.env.NODE_PORT || 3000,
+    TLS: true,
     COOKIE: {
       SECURE: true,
       EXPIRES: {

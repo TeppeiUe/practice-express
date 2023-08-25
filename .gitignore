@@ -1,6 +1,16 @@
-/node/node_modules/
-/node/logger/
-/pgadmin/
-/db/
-/node/public/*
-!/node/public/.gitkeep
+# Node
+node_modules
+
+# output
+logger
+pgadmin
+db
+node/public
+# !/node/public/.gitkeep
+
+# SSL server certificate
+privateKey.pem
+cert.pem
+
+# System files
+.DS_Store

@@ -26,4 +26,20 @@ app.use((req, res, next) => {
 app.use(request.cookie_check);
 require('./router')(app);
 
-app.listen(WEB.PORT, () => log.app.info(`Running at port: ${WEB.PORT}`));
+
+const server = (() => {
+  if (WEB.TLS) {
+    const fs = require('fs');
+    return require('https').createServer({
+      key: fs.readFileSync(`${__dirname}/privateKey.pem`),
+      cert: fs.readFileSync(`${__dirname}/cert.pem`),
+    }, app);
+
+  } else {
+    return require('http').createServer(app);
+  }
+})();
+
+server.listen(WEB.PORT, () => 
+  log.app.info(`Running at TLS: ${WEB.TLS}, PORT: ${WEB.PORT}`)
+);
