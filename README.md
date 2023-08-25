@@ -1,55 +1,32 @@
 # practice-express
 - SPA開発の練習を目的とし、web周りの学習を兼ね実装
-- シンプルなSNSライクのAPIを返す設計
-- 今後追加予定の機能
-  - CSRF対策
-  - SSL化
-  - cronでバッチ処理（期限切れsession_idを削除）
-  - エラーメッセージのI18N化
-
+- シンプルなSNSライクのAPIで構成
 ___
 
-## 使用方法
-前提：Dockerがインストール済みであること
+## 利用環境
+- Linux環境（手順は変わるがWindowsでも可）
+- Dockerがインストール済みであること
 
-### サーバーの起動方法
-
-#### 1. コンテナの起動
+## サーバーの起動方法
 ```
-$ docker-compose up -d
-```
-
-#### 2. webサーバーの起動
-nodejs-expressコンテナに入り、作業ディレクトリに移動
-```
-$ docker exec -it practice_web bash
-$ cd /var/src
+$ bash start.sh
 ```
 
-○初回起動時  
+### 初回起動(環境構築)
 モジュールのインストールとDBの構築
 ```
-$ npm install
-$ node server.js init_db
+$ npm i
+$ npm run init:db
 ```
 
-○通常起動
+### Webサーバ起動
 ```
-$ npm run start
+$ npm start
 ```
 
 ### サーバーの停止方法
-
-#### 1. webサーバーの停止
-- 「Ctrl + C」でnodeの実行を停止
-- `exit`コマンドを実行し、nodejs-expressコンテナから抜ける。
-
-#### 2. コンテナの停止
-```
-$ docker-compose down
-```
-
----
+- 「Ctrl + C」でスクリプトの実行を停止
+- `exit`コマンドを実行し、nodeコンテナから抜ける。
 
 ## 動作確認
 - 利用可能なAPIは、[DB設計](#設計情報)を参照
@@ -101,13 +78,13 @@ ___
 #### 1. `localhost:8888`にアクセス
 
 #### 2. Email及びPasswordは以下の通り
-- pgadmin[]()@email.jp
-- pgadmin_password
+- test[]()@test.com
+- password
 
 #### 3. 新規サーバーを登録（赤枠は5の内容）
 <img width=250 src="./assets/pgadmin4-1.png">
 
-#### 4. 登録情報はおおよそ以下の図の通りで、Passwordは`db_password`
+#### 4. 登録情報はおおよそ以下の図の通りで、Passwordは`password`
 <table>
 <tr>
 <td>

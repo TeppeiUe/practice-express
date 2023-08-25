@@ -1,6 +1,6 @@
 /node/node_modules/
 /node/logger/
-/pgadmin4/*
-/db/*
+/pgadmin/
+/db/
 /node/public/*
 !/node/public/.gitkeep

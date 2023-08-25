@@ -1,47 +1,50 @@
 version: "3"
 services:
-  nodejs-express:
+  web-service:
     image: node:18.12.1
-    container_name: practice_web
+    container_name: $CONTAINER_WEB
     ports:
-      - 8080:3000
+      - 8080:$NODE_PORT
     environment:
-      NODE_ENV: development
-      NODE_PORT: 3000
-      DB_USER: db_user
-      DB_PASSWORD: db_password
-      DB_HOST: postgresdb
-      DB_PORT: 5432
-      DB_NAME: db_name
+      NODE_ENV: $NODE_ENV
+      NODE_PORT: $NODE_PORT
+      DB_USER: $DB_USER
+      DB_PASSWORD: $DB_PASSWORD
+      DB_HOST: db-service
+      DB_PORT: $DB_PORT
+      DB_NAME: $DB_NAME
       TZ: Asia/Tokyo
     tty: true # コンテナの正常終了を阻止
     depends_on:
-      - postgresdb
+      - db-service
     volumes:
-      - ./node:/var/src
+      - ./node:$WORKING_DIR
+    working_dir: $WORKING_DIR
 
-  postgresdb:
+  db-service:
     image: postgres:13.2
-    container_name: practice_db
+    container_name: $CONTAINER_DB
     ports:
-      - 5432:5432
+      - 5432:$DB_PORT
+    user: root # 特に問題は起きていなかったが、pgadminと同様の対応
     environment:
-      POSTGRES_USER: db_user
-      POSTGRES_PASSWORD: db_password
-      POSTGRES_DB: db_name
+      POSTGRES_USER: $DB_USER
+      POSTGRES_PASSWORD: $DB_PASSWORD
+      POSTGRES_DB: $DB_NAME
       TZ: "Asia/Tokyo"
     volumes:
       - ./db/data:/var/lib/postgresql/data # 初期起動の際は/db直下の/dataを削除
 
-  pgadmin4:
+  pgadmin-service:
     image: dpage/pgadmin4:6.15
-    container_name: practice_pgadmin
+    container_name: $CONTAINER_PGADMIN
     ports:
       - 8888:80
+    user: root # ./pgadminがroot権限で生成されるため
     volumes:
-      - ./pgadmin4:/var/lib/pgadmin
+      - ./pgadmin:/var/lib/pgadmin
     environment:
-      PGADMIN_DEFAULT_EMAIL: pgadmin@email.jp
-      PGADMIN_DEFAULT_PASSWORD: pgadmin_password
+      PGADMIN_DEFAULT_EMAIL: test@test.com
+      PGADMIN_DEFAULT_PASSWORD: password
     depends_on:
-      - postgresdb
+      - db-service
