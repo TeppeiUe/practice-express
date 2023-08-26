@@ -1,7 +1,6 @@
 const models = require('../models');
 const { Op } = models.Sequelize;
 const log = require('../logs');
-const { WEB } = require('config');
 const { session }  = require('../services');
 const { session_validator } = require('../filters');
 
@@ -90,11 +89,7 @@ module.exports.create = async (req, res, next) => {
 
           } else {
             const { session_id, expires } = ret;
-
-            res.cookie('session_id', session_id, {
-              expires: new Date(expires),
-              httpOnly: WEB.COOKIE.SECURE
-            });
+            session.setCookie(res, session_id, expires)
 
             const {
               id,
@@ -321,7 +316,7 @@ module.exports.delete = async (req, res, next) => {
           res.status(500).json({ message: ['system error'] });
 
         } else {
-          res.clearCookie('session_id');
+          session.crearCookie(res);
           res.status(204).end();
 
         }

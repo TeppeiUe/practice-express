@@ -7,6 +7,7 @@ services:
       - 8080:$NODE_PORT
     environment:
       NODE_ENV: $NODE_ENV
+      NODE_DOMAIN_NAME: $NODE_DOMAIN_NAME
       NODE_PORT: $NODE_PORT
       DB_USER: $DB_USER
       DB_PASSWORD: $DB_PASSWORD
@@ -35,16 +36,16 @@ services:
     volumes:
       - ./db/data:/var/lib/postgresql/data # 初期起動の際は/db直下の/dataを削除
 
-  pgadmin-service:
-    image: dpage/pgadmin4:6.15
-    container_name: $CONTAINER_PGADMIN
-    ports:
-      - 8888:80
-    user: root # ./pgadminがroot権限で生成されるため
-    volumes:
-      - ./pgadmin:/var/lib/pgadmin
-    environment:
-      PGADMIN_DEFAULT_EMAIL: test@test.com
-      PGADMIN_DEFAULT_PASSWORD: password
-    depends_on:
-      - db-service
+  # pgadmin-service:
+  #   image: dpage/pgadmin4:6.15
+  #   container_name: $CONTAINER_PGADMIN
+  #   ports:
+  #     - 8888:80
+  #   user: root # ./pgadminがroot権限で生成されるため
+  #   volumes:
+  #     - ./pgadmin:/var/lib/pgadmin
+  #   environment:
+  #     PGADMIN_DEFAULT_EMAIL: test@test.com
+  #     PGADMIN_DEFAULT_PASSWORD: password
+  #   depends_on:
+  #     - db-service

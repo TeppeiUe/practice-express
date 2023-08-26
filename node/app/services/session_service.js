@@ -1,7 +1,10 @@
 const crypto = require('crypto');
 const moment = require('moment');
-const { WEB } = require('config');
 const models = require('../models');
+
+const { WEB } = require('config');
+const { TLS, HOST } = WEB;
+const { NAME, EXPIRES, SAME_SITE } = WEB.COOKIE;
 
 
 /**
@@ -19,8 +22,7 @@ const models = require('../models');
 module.exports.create = async (user_id, callback) => {
 
   const session_id = crypto.randomBytes(8).toString('base64');
-  const setting = WEB.COOKIE.EXPIRES;
-  const expires = moment().add(setting.VALUE, setting.UNIT).toISOString();
+  const expires = moment().add(EXPIRES.VALUE, EXPIRES.UNIT).toISOString();
 
   await models.session.create({
       session_id,
@@ -44,8 +46,7 @@ module.exports.create = async (user_id, callback) => {
   .catch(err => callback(null, err));
 
   if (session) {
-    const setting = WEB.COOKIE.EXPIRES;
-    const expires = moment().add(setting.VALUE, setting.UNIT);
+    const expires = moment().add(EXPIRES.VALUE, EXPIRES.UNIT);
 
     await session.update({ expires })
     .catch(err => callback(null, err));
@@ -78,3 +79,31 @@ module.exports.create = async (user_id, callback) => {
   return callback(null)
 
 };
+
+// sameSite属性のdefaultは「lax」であるが、secure属性がある場合「none」で無ければblockされる。
+const cookieOptions = {
+  domain: HOST,
+  httpOnly: true,
+  secure: TLS,
+  sameSite: TLS ? SAME_SITE : 'lax'
+}
+
+/**
+ * Set Cookie to response
+ * @param {HttpResponse} res 
+ * @param {string} session_id 
+ * @param {Date} expires 
+ */
+module.exports.setCookie = (res, session_id, expires) => {
+  res.cookie(NAME, session_id, {
+    expires: new Date(expires),
+    ...cookieOptions
+  });
+};
+
+
+/**
+ * Clear Cookie to response
+ * @param {HttpResponse} res 
+ */
+module.exports.crearCookie = res => res.clearCookie(NAME, cookieOptions);

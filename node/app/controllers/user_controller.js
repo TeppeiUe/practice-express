@@ -2,7 +2,6 @@ const models = require('../models');
 const log = require('../logs');
 const { user_validator } = require('../filters');
 const { session } = require('../services');
-const { WEB } = require('config');
 
 
 /**
@@ -31,10 +30,7 @@ module.exports.create = async (req, res, next) => {
             const { session_id, expires } = ret;
             const { id, user_name, image, profile, created_at } = user;
 
-            res.cookie('session_id', session_id, {
-              expires: new Date(expires),
-              httpOnly: WEB.COOKIE.SECURE
-            });
+            session.setCookie(res, session_id, expires);
 
             res.location('/user/' + id);
 

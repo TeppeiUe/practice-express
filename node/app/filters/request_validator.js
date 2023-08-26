@@ -1,6 +1,5 @@
 const { session } = require('../services');
 const log = require('../logs');
-const { WEB } = require('config');
 
 
 /**
@@ -42,11 +41,7 @@ module.exports.cookie_check = async (req, res, next) => {
       } else {
         if (ret) {
           const { user_id, expires } = ret;
-
-          res.cookie('session_id', session_id, {
-            expires: new Date(expires),
-            httpOnly: WEB.COOKIE.SECURE
-          });
+          session.setCookie(res, session_id, expires);
 
           // 後続のミドルウェアで使用予定
           req.current_user = { id: user_id };

@@ -1,9 +1,21 @@
+const {
+  NODE_DOMAIN_NAME=localhost,
+  NODE_PORT=3000,
+  DB_NAME,
+  DB_USER,
+  DB_PASSWORD,
+  DB_HOST,
+  DB_PORT
+} = process.env
+
 module.exports = {
   WEB: {
-    PORT: process.env.NODE_PORT || 3000,
-    TLS: true,
+    PORT: NODE_PORT,
+    TLS: false,
     COOKIE: {
-      SECURE: true,
+      NAME: 'session_id',
+      SAME_SITE: 'none',
+      DOMAIN: NODE_DOMAIN_NAME,
       EXPIRES: {
         UNIT: 'm',
         VALUE: 30
@@ -15,12 +27,12 @@ module.exports = {
     }
   },
   DB: {
-    DB_NAME: process.env.DB_NAME,
-    DB_USER: process.env.DB_USER,
-    DB_PASSWORD: process.env.DB_PASSWORD,
+    DB_NAME,
+    DB_USER,
+    DB_PASSWORD,
     DB_OPTIONS: {
-      host: process.env.DB_HOST,
-      port: process.env.DB_PORT,
+      host: DB_HOST,
+      port: DB_PORT,
       dialect: 'postgres',
       timezone: '+09:00',
     }
