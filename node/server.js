@@ -8,6 +8,8 @@ const log = require('./app/logs');
 const cookieParser = require('cookie-parser');
 const { request } = require('./app/filters');
 const path = require('path');
+const cors = require('cors');
+
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -15,13 +17,29 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Setting for CORS
-app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', 'http://localhost:4200');
-  res.header('Access-Control-Allow-Methods', 'GET, PUT, POST, DELETE, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Content-Type');
-  res.header('Access-Control-Allow-Credentials', true);
-  next();
-});
+const corsOptionsDelegate = function (req, callback) {
+  const corsOptions = (() => {
+    const { ALLOW_ORIGINS, ALLOW_METHODS, ALLOW_HEADERS } = WEB.CORS;
+    
+    if (ALLOW_ORIGINS.indexOf(req.headers.origin) !== -1) {
+      return {
+        // Access-Control-Allow-Origin
+        origin: true,
+        // Access-Control-Allow-Methods
+        methods: ALLOW_METHODS,
+        // Access-Control-Allow-Headers
+        allowedHeaders: ALLOW_HEADERS,
+        // Access-Control-Allow-Credentials
+        credentials: true,
+      }
+    } else {
+      return { origin: false }
+    }
+  })();
+  
+  callback(null, corsOptions);
+};
+app.use(cors(corsOptionsDelegate));
 
 app.use(request.cookie_check);
 require('./router')(app);

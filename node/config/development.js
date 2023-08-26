@@ -12,6 +12,22 @@ module.exports = {
   WEB: {
     PORT: NODE_PORT,
     TLS: false,
+    CORS: {
+      ALLOW_ORIGINS: [
+        'http://localhost:4200',
+        'http://localhost:8000',
+        'https://localhost'
+      ],
+      ALLOW_METHODS: [
+        'GET',
+        'PUT',
+        'POST',
+        'DELETE'
+      ],
+      ALLOW_HEADERS: [
+        'Content-Type'
+      ]
+    },
     COOKIE: {
       NAME: 'session_id',
       SAME_SITE: 'none',
