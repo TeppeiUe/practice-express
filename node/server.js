@@ -16,8 +16,12 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Setting for CORS
-const corsOptionsDelegate = function (req, callback) {
+/**
+ * Get corsOptions
+ * @param {express.Request} req 
+ * @param {any} callback 
+ */
+const corsOptionsDelegate = (req, callback) => {
   const corsOptions = (() => {
     const { ALLOW_ORIGINS, ALLOW_METHODS, ALLOW_HEADERS } = WEB.CORS;
     
