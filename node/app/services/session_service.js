@@ -1,3 +1,4 @@
+const express = require('express');
 const crypto = require('crypto');
 const moment = require('moment');
 const models = require('../models');
@@ -28,9 +29,11 @@ module.exports.create = async (user_id, callback) => {
       session_id,
       user_id,
       expires
-  }).catch(err => callback(null, err));
+  })
+  .then(() => callback({ session_id, expires }, null))
+  .catch(err => callback(null, err));
 
-  return callback({ session_id, expires }, null)
+  return callback
 
 };
 
@@ -42,24 +45,26 @@ module.exports.create = async (user_id, callback) => {
  */
  module.exports.search = async (session_id, callback) => {
 
-  const session = await models.session.findByPk(session_id)
+  await models.session.findByPk(session_id)
+  .then(session => {
+    if (session) {
+      const expires = moment().add(EXPIRES.VALUE, EXPIRES.UNIT);
+
+      session.update({ expires })
+      .then(() => callback({
+          user_id: session.user_id,
+          ...{ expires }
+        }, null
+      ))
+      .catch(err => callback(null, err));
+
+    } else {
+      callback(null, null);
+    }
+  })
   .catch(err => callback(null, err));
 
-  if (session) {
-    const expires = moment().add(EXPIRES.VALUE, EXPIRES.UNIT);
-
-    await session.update({ expires })
-    .catch(err => callback(null, err));
-
-    return callback({
-      user_id: session.user_id,
-      ...{ expires }
-    }, null)
-
-  } else {
-    return callback(null, null)
-
-  }
+  return callback
 
 };
 
@@ -67,16 +72,17 @@ module.exports.create = async (user_id, callback) => {
 /**
  * 指定したsession_idを削除
  * @param {number|string} session_id
- * @param {any} callback
+ * @param {callback} callback
  */
  module.exports.delete = async (session_id, callback) => {
 
   await models.session.destroy({
     where: { session_id }
   })
-  .catch(err => callback(err));
+  .then(() => callback(null, null))
+  .catch(err => callback(null, err));
 
-  return callback(null)
+  return callback
 
 };
 
@@ -90,7 +96,7 @@ const cookieOptions = {
 
 /**
  * Set Cookie to response
- * @param {HttpResponse} res 
+ * @param {express.Response} res 
  * @param {string} session_id 
  * @param {Date} expires 
  */
@@ -104,6 +110,6 @@ module.exports.setCookie = (res, session_id, expires) => {
 
 /**
  * Clear Cookie to response
- * @param {HttpResponse} res 
+ * @param {express.Response} res 
  */
 module.exports.crearCookie = res => res.clearCookie(NAME, cookieOptions);
