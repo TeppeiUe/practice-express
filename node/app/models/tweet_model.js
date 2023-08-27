@@ -1,10 +1,10 @@
+const { Sequelize, DataTypes } = require('sequelize');
+
 /**
  * ツイートテーブル
  * @param {Sequelize} sequelize
- * @param {Sequelize.DataTypes} DataTypes
- * @returns {Sequelize}
  */
-module.exports = (sequelize, DataTypes) => {
+module.exports = sequelize => {
 
   return sequelize.define('tweet', {
     id: {

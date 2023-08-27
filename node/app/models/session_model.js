@@ -1,10 +1,10 @@
+const { Sequelize, DataTypes } = require('sequelize');
+
 /**
  * セッションテーブル
  * @param {Sequelize} sequelize
- * @param {Sequelize.DataTypes} DataTypes
- * @returns {Sequelize}
  */
-module.exports = (sequelize, DataTypes) => {
+module.exports = sequelize => {
 
   let session = sequelize.define('session', {
     session_id: {

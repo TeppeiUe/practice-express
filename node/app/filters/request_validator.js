@@ -1,12 +1,13 @@
+const express = require('express');
 const { session } = require('../services');
 const log = require('../logs');
 
 
 /**
  * cookieチェック
- * @param {HttpRequest} req
- * @param {HttpResponse} res
- * @param {NextFunction} next
+ * @param {express.Request} req
+ * @param {express.Response} res
+ * @param {express.NextFunction} next
  * @returns {ServerResponse}
  */
 module.exports.cookie_check = async (req, res, next) => {

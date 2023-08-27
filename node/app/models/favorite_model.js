@@ -1,10 +1,10 @@
+const { Sequelize, DataTypes } = require('sequelize');
+
 /**
  * お気に入りテーブル
  * @param {Sequelize} sequelize
- * @param {Sequelize.DataTypes} DataTypes
- * @returns {Sequelize}
  */
-module.exports = (sequelize, DataTypes) => {
+module.exports = sequelize => {
 
   let favorite = sequelize.define('favorite', {
     user_id: {

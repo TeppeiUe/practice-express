@@ -1,10 +1,10 @@
+const { Sequelize, DataTypes } = require('sequelize');
+
 /**
  * ユーザーテーブル
  * @param {Sequelize} sequelize
- * @param {Sequelize.DataTypes} DataTypes
- * @returns {Sequelize}
  */
-module.exports = (sequelize, DataTypes) => {
+module.exports = sequelize => {
 
   return sequelize.define('user', {
     id: {

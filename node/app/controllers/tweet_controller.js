@@ -1,3 +1,4 @@
+const express = require('express');
 const { sequelize, Sequelize, ...models } = require('../models');
 const log = require('../logs');
 const { tweet_validator } = require('../filters');
@@ -5,9 +6,9 @@ const { tweet_validator } = require('../filters');
 
 /**
  * API: /tweet, ツイート
- * @param {HttpRequest} req
- * @param {HttpResponse} res
- * @param {NextFunction} next
+ * @param {express.Request} req
+ * @param {express.Response} res
+ * @param {express.NextFunction} next
  */
 module.exports.create = async (req, res, next) => {
 
@@ -58,9 +59,9 @@ module.exports.create = async (req, res, next) => {
 
 /**
  * API: /tweet/:id, ツイート詳細
- * @param {HttpRequest} req
- * @param {HttpResponse} res
- * @param {NextFunction} next
+ * @param {express.Request} req
+ * @param {express.Response} res
+ * @param {express.NextFunction} next
  */
 module.exports.show = async (req, res, next) => {
 
@@ -141,9 +142,9 @@ module.exports.show = async (req, res, next) => {
 
 /**
  * API: /tweets, ツイート一覧
- * @param {HttpRequest} req
- * @param {HttpResponse} res
- * @param {NextFunction} next
+ * @param {express.Request} req
+ * @param {express.Response} res
+ * @param {express.NextFunction} next
  */
 module.exports.index = async (req, res, next) => {
 
@@ -206,9 +207,9 @@ module.exports.index = async (req, res, next) => {
 
 /**
  * API: /tweet/:id (DELETE), ツイート削除
- * @param {HttpRequest} req
- * @param {HttpResponse} res
- * @param {NextFunction} next
+ * @param {express.Request} req
+ * @param {express.Response} res
+ * @param {express.NextFunction} next
  */
 module.exports.delete = async (req, res, next) => {
 

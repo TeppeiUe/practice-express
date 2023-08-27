@@ -1,10 +1,11 @@
+const express = require('express');
 const { check, crypto } = require('../services');
 const { WEB } = require('config');
 
 
 /**
  * API: /user (POST), ユーザー登録
- * @param {HttpRequest} req
+ * @param {express.Request} req
  * @param {callback} callback
  */
  module.exports.create = async (req, callback) => {
@@ -71,7 +72,7 @@ const { WEB } = require('config');
 
 /**
  * API: /user/:id, ユーザー情報
- * @param {HttpRequest} req
+ * @param {express.Request} req
  * @param {callback} callback
  */
 module.exports.show = (req, callback) => {
@@ -107,7 +108,7 @@ module.exports.show = (req, callback) => {
 
 /**
  * API: /user (PUT), ユーザー情報更新
- * @param {HttpRequest} req
+ * @param {express.Request} req
  * @param {callback} callback
  */
 module.exports.update = async (req, callback) => {

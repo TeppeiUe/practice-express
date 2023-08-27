@@ -1,8 +1,9 @@
+const express = require('express');
 const controllers = require('./app/controllers');
 
 /**
  * ルーティング管理
- * @param {Express} app
+ * @param {express.Express} app
  */
 module.exports = app => {
   app.post('/login', controllers.session.create);

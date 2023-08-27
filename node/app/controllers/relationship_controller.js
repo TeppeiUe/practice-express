@@ -1,3 +1,4 @@
+const express = require('express');
 const models = require('../models');
 const { Op } = models.Sequelize;
 const log = require('../logs');
@@ -6,9 +7,9 @@ const { relation_validator } = require('../filters');
 
 /**
  * API: /user/:id/following (POST), フォロー
- * @param {HttpRequest} req
- * @param {HttpResponse} res
- * @param {NextFunction} next
+ * @param {express.Request} req
+ * @param {express.Response} res
+ * @param {express.NextFunction} next
  */
 module.exports.create = async (req, res, next) => {
 
@@ -53,9 +54,9 @@ module.exports.create = async (req, res, next) => {
 
 /**
  * API: /user/:id/followings, フォロー一覧
- * @param {HttpRequest} req
- * @param {HttpResponse} res
- * @param {NextFunction} next
+ * @param {express.Request} req
+ * @param {express.Response} res
+ * @param {express.NextFunction} next
  */
 module.exports.followings = async (req, res, next) => {
 
@@ -105,9 +106,9 @@ module.exports.followings = async (req, res, next) => {
 
 /**
  * API: /user/:id/followers, フォロワー一覧
- * @param {HttpRequest} req
- * @param {HttpResponse} res
- * @param {NextFunction} next
+ * @param {express.Request} req
+ * @param {express.Response} res
+ * @param {express.NextFunction} next
  */
 module.exports.followers = async (req, res, next) => {
 
@@ -158,9 +159,9 @@ module.exports.followers = async (req, res, next) => {
 
 /**
  * API: /user/:id/following (DELETE), フォロー削除
- * @param {HttpRequest} req
- * @param {HttpResponse} res
- * @param {NextFunction} next
+ * @param {express.Request} req
+ * @param {express.Response} res
+ * @param {express.NextFunction} next
  */
  module.exports.delete = async (req, res, next) => {
 

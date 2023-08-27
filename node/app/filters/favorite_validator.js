@@ -1,9 +1,10 @@
+const express = require('express');
 const { check } = require('../services');
 
 
 /**
  * API: /tweet/:id/favorite (POST), お気に入り登録
- * @param {HttpRequest} req
+ * @param {express.Request} req
  * @param {callback} callback
  */
  module.exports.create = async (req, callback) => {
@@ -44,7 +45,7 @@ const { check } = require('../services');
 
 /**
  * API: /user/:id/favorites , お気に入りツイート一覧
- * @param {HttpRequest} req
+ * @param {express.Request} req
  * @param {callback} callback
  */
  module.exports.index = (req, callback) => {
@@ -79,7 +80,7 @@ const { check } = require('../services');
 
 /**
  * API: /tweet/:id/favorite (DELETE), お気に入り削除
- * @param {HttpRequest} req
+ * @param {express.Request} req
  * @param {callback} callback
  */
  module.exports.delete = (req, callback) => {

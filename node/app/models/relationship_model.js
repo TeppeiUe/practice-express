@@ -1,10 +1,10 @@
+const { Sequelize, DataTypes } = require('sequelize');
+
 /**
  * リレーションテーブル
  * @param {Sequelize} sequelize
- * @param {Sequelize.DataTypes} DataTypes
- * @returns {Sequelize}
  */
-module.exports = (sequelize, DataTypes) => {
+module.exports = sequelize => {
 
   let relationship = sequelize.define('relationship', {
     user_id: {

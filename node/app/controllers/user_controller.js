@@ -1,3 +1,4 @@
+const express = require('express');
 const models = require('../models');
 const log = require('../logs');
 const { user_validator } = require('../filters');
@@ -6,9 +7,9 @@ const { session } = require('../services');
 
 /**
  * API: /user, ユーザー登録
- * @param {HttpRequest} req
- * @param {HttpResponse} res
- * @param {NextFunction} next
+ * @param {express.Request} req
+ * @param {express.Response} res
+ * @param {express.NextFunction} next
  */
 module.exports.create = async (req, res, next) => {
 
@@ -71,9 +72,9 @@ module.exports.create = async (req, res, next) => {
 
 /**
  * API: /user/:id, ユーザー情報
- * @param {HttpRequest} req
- * @param {HttpResponse} res
- * @param {NextFunction} next
+ * @param {express.Request} req
+ * @param {express.Response} res
+ * @param {express.NextFunction} next
  */
 module.exports.show = async (req, res, next) => {
 
@@ -162,9 +163,9 @@ module.exports.show = async (req, res, next) => {
 
 /**
  * API: /user (PUT), ユーザー情報更新
- * @param {HttpRequest} req
- * @param {HttpResponse} res
- * @param {NextFunction} next
+ * @param {express.Request} req
+ * @param {express.Response} res
+ * @param {express.NextFunction} next
  */
 module.exports.update = async (req, res, next) => {
 
@@ -199,9 +200,9 @@ module.exports.update = async (req, res, next) => {
 
 /**
  * API: /users, ユーザー一覧
- * @param {HttpRequest} req
- * @param {HttpResponse} res
- * @param {NextFunction} next
+ * @param {express.Request} req
+ * @param {express.Response} res
+ * @param {express.NextFunction} next
  */
 module.exports.index = async (req, res, next) => {
 

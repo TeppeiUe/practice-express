@@ -1,9 +1,10 @@
+const express = require('express');
 const { check } = require('../services');
 
 
 /**
  * API: /user/:id/following (POST), フォロー
- * @param {HttpRequest} req
+ * @param {express.Request} req
  * @param {callback} callback
  */
  module.exports.create = async (req, callback) => {
@@ -45,7 +46,7 @@ const { check } = require('../services');
 
 /**
  * API: /user/:id/(followings, followers), (フォロー, フォロワー)一覧
- * @param {HttpRequest} req
+ * @param {express.Request} req
  * @param {callback} callback
  */
  module.exports.index = (req, callback) => {
@@ -80,7 +81,7 @@ const { check } = require('../services');
 
 /**
  * API: /user/:id/following (DELETE), フォロー削除
- * @param {HttpRequest} req
+ * @param {express.Request} req
  * @param {callback} callback
  */
  module.exports.delete = async (req, callback) => {

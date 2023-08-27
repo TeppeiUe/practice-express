@@ -1,3 +1,4 @@
+const express = require('express');
 const models = require('../models');
 const { Op } = models.Sequelize;
 const log = require('../logs');
@@ -6,9 +7,9 @@ const { favorite_validator } = require('../filters');
 
 /**
  * API: /tweet/:id/favorite (POST), お気に入り登録
- * @param {HttpRequest} req
- * @param {HttpResponse} res
- * @param {NextFunction} next
+ * @param {express.Request} req
+ * @param {express.Response} res
+ * @param {express.NextFunction} next
  */
 module.exports.create = async (req, res, next) => {
 
@@ -49,9 +50,9 @@ module.exports.create = async (req, res, next) => {
 
 /**
  * API: /user/:id/favorites, お気に入りツイート一覧
- * @param {HttpRequest} req
- * @param {HttpResponse} res
- * @param {NextFunction} next
+ * @param {express.Request} req
+ * @param {express.Response} res
+ * @param {express.NextFunction} next
  */
 module.exports.index = async (req, res, next) => {
 
@@ -136,9 +137,9 @@ module.exports.index = async (req, res, next) => {
 
 /**
  * API: /tweet/:id/favorite (DELETE), お気に入り削除
- * @param {HttpRequest} req
- * @param {HttpResponse} res
- * @param {NextFunction} next
+ * @param {express.Request} req
+ * @param {express.Response} res
+ * @param {express.NextFunction} next
  */
 module.exports.delete = async (req, res, next) => {
 

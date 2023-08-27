@@ -1,3 +1,4 @@
+const express = require('express');
 const models = require('../models');
 const { Op } = models.Sequelize;
 const log = require('../logs');
@@ -7,9 +8,9 @@ const { session_validator } = require('../filters');
 
 /**
  * API: /login (POST), ログイン
- * @param {HttpRequest} req
- * @param {HttpResponse} res
- * @param {NextFunction} next
+ * @param {express.Request} req
+ * @param {express.Response} res
+ * @param {express.NextFunction} next
  */
 module.exports.create = async (req, res, next) => {
 
@@ -170,9 +171,9 @@ module.exports.create = async (req, res, next) => {
 
 /**
  * API: /session (POST), セッションチェック
- * @param {HttpRequest} req
- * @param {HttpResponse} res
- * @param {NextFunction} next
+ * @param {express.Request} req
+ * @param {express.Response} res
+ * @param {express.NextFunction} next
  */
 module.exports.search = async (req, res, next) => {
 
@@ -302,17 +303,17 @@ module.exports.search = async (req, res, next) => {
 
 /**
  * API: /logout (DELETE), ログアウト
- * @param {HttpRequest} req
- * @param {HttpResponse} res
- * @param {NextFunction} next
+ * @param {express.Request} req
+ * @param {express.Response} res
+ * @param {express.NextFunction} next
  */
 module.exports.delete = async (req, res, next) => {
 
   const callback = {
     success: async () => {
-      await session.delete(req.cookies.session_id, ret => {
-        if (ret) {
-          log.app.error(ret);
+      await session.delete(req.cookies.session_id, (ret, err) => {
+        if (err) {
+          log.app.error(err);
           res.status(500).json({ message: ['system error'] });
 
         } else {

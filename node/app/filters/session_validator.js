@@ -1,9 +1,10 @@
+const express = require('express');
 const { check, crypto } = require('../services');
 const { WEB } = require('config');
 
 /**
  * API: /login (POST), ログイン
- * @param {HttpRequest} req
+ * @param {express.Request} req
  * @param {callback} callback
  */
 module.exports.create = (req, callback) => {
@@ -51,7 +52,7 @@ module.exports.create = (req, callback) => {
 
 /**
  * API: /logout (DELETE), ログアウト
- * @param {HttpRequest} req
+ * @param {express.Request} req
  * @param {callback} callback
  */
 module.exports.delete = (req, callback) => {

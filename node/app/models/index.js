@@ -2,18 +2,24 @@
  * @module model
  * @desc テーブル管理
  */
-const { Sequelize, DataTypes } = require('sequelize');
+const { Sequelize } = require('sequelize');
 const { DB } = require('config');
 const log = require('../logs');
 
+const {
+  DB_OPTIONS,
+  DB_NAME,
+  DB_USER,
+  DB_PASSWORD
+} = DB;
 
-DB.DB_OPTIONS.logging = msg => log.app.info(msg);
+DB_OPTIONS.logging = msg => log.app.info(msg);
 
 const sequelize = new Sequelize(
-  DB.DB_NAME,
-  DB.DB_USER,
-  DB.DB_PASSWORD,
-  DB.DB_OPTIONS
+  DB_NAME,
+  DB_USER,
+  DB_PASSWORD,
+  DB_OPTIONS
 );
 
 // connection confirm
@@ -29,11 +35,11 @@ module.exports = {
   sequelize: sequelize,
   Sequelize: Sequelize,
 
-  user: require('./user_model')(sequelize, DataTypes),
-  session: require('./session_model')(sequelize, DataTypes),
-  relationship: require('./relationship_model')(sequelize, DataTypes),
-  tweet: require('./tweet_model')(sequelize, DataTypes),
-  favorite: require('./favorite_model')(sequelize, DataTypes)
+  user: require('./user_model')(sequelize),
+  session: require('./session_model')(sequelize),
+  relationship: require('./relationship_model')(sequelize),
+  tweet: require('./tweet_model')(sequelize),
+  favorite: require('./favorite_model')(sequelize)
 
 };
 
