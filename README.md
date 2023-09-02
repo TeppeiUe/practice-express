@@ -29,7 +29,7 @@ $ npm start
 - `exit`コマンドを実行し、nodeコンテナから抜ける。
 
 ## 動作確認
-- 利用可能なAPIは、[DB設計](#設計情報)を参照
+- 利用可能なAPIは、[API設計][swagger]を参照
 - 登録情報の確認は、[DB管理ツール利用方法](#db管理ツール利用方法)を参照
 
 ### curlを利用
@@ -67,7 +67,7 @@ ___
 ## 設計情報
 <img width="300" src="./assets/er.png">
 
-- [API設計](https://docs.google.com/spreadsheets/d/1dszmDHifASGQMDyBLVrZOB6KvdG3vVnUZawoQbB7GQo/edit?usp=sharing) (Google スプレッドシート)
+- [API設計][swagger]
 - [DB設計](https://docs.google.com/spreadsheets/d/1MhOT3dtFqDXTU8DcI92KUJz8gfzLNuqZS16lS9t31Do/edit?usp=sharing) (Google スプレッドシート)
 
 ___
@@ -97,5 +97,7 @@ ___
 </table>
 
 #### 5. 対象のテーブルを選択し、3で参照した図で赤枠で囲まれたアイコン(View Data)を押下することで、内容の確認が可能
-※テーブル群はサイドバーの以下パスに存在
-Servers/practice_db/Databases/db_name/Schemas/public/Tables
+※テーブル群はサイドバーの以下パスに存在  
+`Servers/practice_db/Databases/db_name/Schemas/public/Tables`
+
+[swagger]: https://teppeiue.github.io/practice-express/
