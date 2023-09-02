@@ -1,0 +1,757 @@
+openapi: 3.1.0
+
+info:
+  version: 0.0.0
+  title: practice-express API
+  description: practice api server by Express for SPA
+
+servers:
+  - url: 'http://localhost:3000'
+    description: local
+
+tags: 
+  - name: session
+    x-displayName: セッション管理
+    description: セッション関連のAPI群
+  - name: user
+    x-displayName: ユーザ機能
+    description: ユーザ関連のデータを扱うAPI群
+  - name: tweet
+    x-displayName: ツイート機能
+    description: ツイート関連のデータを扱うAPI群
+  - name: follow
+    x-displayName: フォロー機能
+    description: フォロー関連のデータを扱うAPI群
+  - name: favorite
+    x-displayName: お気に入り機能
+    description: お気に入り関連のデータを扱うAPI群
+  
+paths:
+# -----------------------------------------------------------------------------
+# セッション管理API
+# -----------------------------------------------------------------------------
+  /session:
+    post:  
+      summary: セッション確認
+      description: |
+        セッションの有効性を確認するAPI<br>
+        有効である場合Cookieの更新とユーザ基本情報を返却
+      tags:
+        - session
+      depricated: false
+
+      parameters:
+        - $ref: '#/components/parameters/session_id'
+
+      responses:
+        '200':
+          x-summary: Ok
+          description: Ok
+          headers:
+            Set-Cookie:
+              $ref: '#/components/headers/set-cookie'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '401':
+          $ref: '#/components/responses/401'
+        '500':
+          $ref: '#/components/responses/500'
+  
+  /login:
+    post:  
+      summary: ログイン
+      description: ログインAPI
+      tags:
+        - session
+      depricated: false
+
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  $ref: '#/components/schemas/user/email'
+                password:
+                  $ref: '#/components/schemas/user/password'
+              required:
+                - email
+                - password
+      
+      responses:
+        '200':
+          x-summary: Ok
+          description: Ok
+          headers:
+            Set-Cookie:
+              $ref: '#/components/headers/set-cookie'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '401':
+          $ref: '#/components/responses/401'
+        '500':
+          $ref: '#/components/responses/500'
+    
+  /logout:
+    delete:  
+      summary: ログアウト
+      description: ログアウトAPI
+      tags:
+        - session
+      depricated: false
+
+      parameters:
+        - $ref: '#/components/parameters/session_id'
+      
+      responses:
+        '204':
+          $ref: '#/components/responses/204'
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
+                example: session_id=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT; HttpOnly; SameSite=Lax
+        '401':
+          $ref: '#/components/responses/401'
+        '500':
+          $ref: '#/components/responses/500'
+
+# -----------------------------------------------------------------------------
+# ユーザ機能API
+# -----------------------------------------------------------------------------
+  /user:
+    post:  
+      summary: ユーザ登録
+      description: ユーザ登録API
+      tags:
+        - user
+      depricated: false
+
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user_name:
+                  $ref: '#/components/schemas/user/user_name'
+                email:
+                  $ref: '#/components/schemas/user/email'
+                password:
+                  $ref: '#/components/schemas/user/password'
+              required:
+                - user_name
+                - email
+                - password
+      
+      responses:
+        '201':
+          description: Created
+          headers:
+            Set-Cookie:
+              $ref: '#/components/headers/set-cookie'
+          content:
+            application/json:
+              schema:
+               type: object
+               properties:
+                user:
+                  type: object
+                  allOf:
+                    - $ref: '#/components/schemas/UserBase'
+                    - schema:
+                      type: object
+                      properties:
+                        tweets:
+                          type: array
+        
+        '401':
+          $ref: '#/components/responses/401'
+        '500':
+          $ref: '#/components/responses/500'
+  
+    put:  
+      summary: ユーザ更新
+      description: |
+        ユーザ更新API<br>
+        本APIで更新可能な要素は、user_name, profile及びimage
+      tags:
+        - user
+      depricated: false
+
+      parameters:
+        - $ref: '#/components/parameters/session_id'
+
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user_name:
+                  $ref: '#/components/schemas/user/user_name'
+                profile:
+                  $ref: '#/components/schemas/user/profile'
+                image:
+                  $ref: '#/components/schemas/user/image'
+              required:
+                - user_name
+                - profile
+                - image
+      
+      responses:
+        '204':
+          $ref: '#/components/responses/204'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '500':
+          $ref: '#/components/responses/500'
+    
+  /users:
+    get:
+      summary: ユーザ一覧取得
+      description: ユーザ一覧取得API
+      tags:
+        - user
+      depricated: false
+      
+      responses:
+        '200':
+          x-summary: Ok
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  users:
+                    description: ユーザリスト
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/UserBase'
+        '500':
+          $ref: '#/components/responses/500'
+
+  /user/{user_id}:
+    get:
+      summary: ユーザ詳細取得
+      description: ユーザ詳細取得API
+      tags:
+        - user
+      depricated: false
+
+      parameters:
+        - $ref: '#/components/parameters/user_id'
+      
+      responses:
+        '200':
+          x-summary: Ok
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          $ref: '#/components/responses/400'
+        '500':
+          $ref: '#/components/responses/500'
+
+# -----------------------------------------------------------------------------
+# ツイート機能
+# -----------------------------------------------------------------------------
+
+  /tweet:
+    post:  
+      summary: ツイート
+      description: ツイートAPI
+      tags:
+        - tweet
+      depricated: false
+
+      parameters:
+        - $ref: '#/components/parameters/session_id'
+
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  $ref: '#/components/schemas/tweet/message'
+              required:
+                - message
+      
+      responses:
+        '201':
+          x-summary: Created
+          description: |
+            Ok<br>
+            ※レスポンスのお気に入りした人リストは空配列
+          headers:
+            Set-Cookie:
+              $ref: '#/components/headers/set-cookie'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tweet'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '500':
+          $ref: '#/components/responses/500'
+
+  /tweets:
+    get:
+      summary: ツイート覧取得
+      description: ツイート一覧取得API
+      tags:
+        - tweet
+      depricated: false
+      
+      responses:
+        '200':
+          x-summary: Ok
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  tweets:
+                    description: ツイートリスト
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Tweet'
+        '500':
+          $ref: '#/components/responses/500'
+
+  /tweet/{tweet_id}:
+    get:
+      summary: ツイート詳細取得
+      description: ツイート詳細取得API
+      tags:
+        - tweet
+      depricated: false
+
+      parameters:
+        - $ref: '#/components/parameters/tweet_id'
+      
+      responses:
+        '200':
+          x-summary: Ok
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tweet'
+        '400':
+          $ref: '#/components/responses/400'
+        '500':
+          $ref: '#/components/responses/500'
+  
+    delete:
+      summary: ツイート削除
+      description: ツイート削除API
+      tags:
+        - tweet
+      depricated: false
+
+      parameters:
+        - $ref: '#/components/parameters/tweet_id'
+        - $ref: '#/components/parameters/session_id'
+      
+      responses:
+        '204':
+          $ref: '#/components/responses/204'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '500':
+          $ref: '#/components/responses/500'
+
+# -----------------------------------------------------------------------------
+# フォロー機能
+# -----------------------------------------------------------------------------
+
+  /user/{user_id}/following:
+    post:  
+      summary: フォロー登録
+      description: フォロー登録API
+      tags:
+        - follow
+      depricated: false
+
+      parameters:
+        - $ref: '#/components/parameters/user_id'
+        - $ref: '#/components/parameters/session_id'
+      
+      responses:
+        '204':
+          $ref: '#/components/responses/204'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '500':
+          $ref: '#/components/responses/500'
+
+    delete:
+      summary: フォロー削除
+      description: フォロー削除API
+      tags:
+        - follow
+      depricated: false
+
+      parameters:
+        - $ref: '#/components/parameters/user_id'
+        - $ref: '#/components/parameters/session_id'
+      
+      responses:
+        '204':
+          $ref: '#/components/responses/204'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '500':
+          $ref: '#/components/responses/500'
+
+  /user/{user_id}/followings:
+    get:  
+      summary: フォロー一覧取得
+      description: フォロー一覧取得API
+      tags:
+        - follow
+      depricated: false
+      
+      responses:
+        responses:
+        '200':
+          x-summary: Ok
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  users:
+                    description: ユーザリスト
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/UserBase'
+        '400':
+          $ref: '#/components/responses/400'
+        '500':
+          $ref: '#/components/responses/500'
+  
+  /user/{user_id}/followers:
+    get:  
+      summary: フォロワー一覧取得
+      description: フォロワー一覧取得API
+      tags:
+        - follow
+      depricated: false
+      
+      responses:
+        responses:
+        '200':
+          x-summary: Ok
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  users:
+                    description: ユーザリスト
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/UserBase'
+        '400':
+          $ref: '#/components/responses/400'
+        '500':
+          $ref: '#/components/responses/500'
+
+# -----------------------------------------------------------------------------
+# お気に入り機能
+# -----------------------------------------------------------------------------
+
+  /tweet/{tweet_id}/favorite:
+    post:
+      summary: お気に入り登録
+      description: お気に入り登録API
+      tags:
+        - favorite
+      depricated: false
+
+      parameters:
+        - $ref: '#/components/parameters/tweet_id'
+        - $ref: '#/components/parameters/session_id'
+      
+      responses:
+        '204':
+          $ref: '#/components/responses/204'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '500':
+          $ref: '#/components/responses/500'
+
+    delete:
+      summary: お気に入り削除
+      description: お気に入り削除API
+      tags:
+        - favorite
+      depricated: false
+
+      parameters:
+        - $ref: '#/components/parameters/tweet_id'
+        - $ref: '#/components/parameters/session_id'
+      
+      responses:
+        '204':
+          $ref: '#/components/responses/204'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '500':
+          $ref: '#/components/responses/500'
+
+  /user/{user_id}/favorites::
+    get:  
+      summary: お気に入り一覧取得
+      description: お気に入り一覧取得API
+      tags:
+        - favorite
+      depricated: false
+      
+      responses:
+        responses:
+        '200':
+          x-summary: Ok
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  tweets:
+                    description: お気に入りツイートリスト
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Tweet'
+        '400':
+          $ref: '#/components/responses/400'
+        '500':
+          $ref: '#/components/responses/500'
+
+components:
+  parameters:
+    user_id:
+      name: user_id
+      in: path
+      description: ユーザID
+      required: true
+      schema:
+        type: string
+    tweet_id:
+      name: user_id
+      in: path
+      description: ツイートID
+      required: true
+      schema:
+        type: string
+    session_id:
+      name: session_id
+      in: cookie
+      description: session_id
+      required: true
+      schema: 
+        type: string
+      example: IqVkiav4jiI%3D
+
+  schemas:
+    # users table
+    user:
+      id:
+        type: integer
+        description: ユーザID
+        example: 2
+      user_name:
+        type: string
+        description: ユーザ名
+        example: test
+      profile:
+        type: string
+        description: プロフィール（140文字以内）
+        example: Hello World!
+      image:
+        type: string
+        description: base64形式の画像
+        example: xxxx
+      email:
+        type: string
+        description: メールアドレス
+        example: test1@test.com
+      password:
+        type: string
+        description: パスワード
+        example: '!Login000'
+
+    # tweets table
+    tweet:
+      id:
+        type: integer
+        description: ツイートID
+        example: 3
+      message:
+        type: string
+        description: |
+          メッセージ（140文字以内）
+        example: Hello Express!
+      
+    # shared columns
+    created_at:
+      type: string
+      description: 作成日時
+      example: '2023-06-21T13:58:37.501Z'
+    
+    # shared object
+    UserBase:
+      description: ユーザ基本情報
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/user/id'
+        user_name:
+          $ref: '#/components/schemas/user/user_name'
+        profile:
+          $ref: '#/components/schemas/user/profile'
+        image:
+          $ref: '#/components/schemas/user/image'
+        created_at:
+          $ref: '#/components/schemas/created_at'
+    
+    TweetBase:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/tweet/id'
+        user_id:
+          $ref: '#/components/schemas/user/id'
+        message:
+          $ref: '#/components/schemas/tweet/message'
+        created_at:
+          $ref: '#/components/schemas/created_at'
+    
+    User:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/UserBase'
+        - schema:
+          type: object
+          properties:
+            tweets:
+              description: ツイートリスト
+              type: array
+              items:
+                type: object
+                allOf:
+                  - $ref: '#/components/schemas/TweetBase'
+                  - schema:
+                    type: object
+                    properties:
+                      favoritets:
+                        description: お気に入りした人リスト
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/UserBase'
+    
+    Tweet:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/TweetBase'
+        - schema:
+          type: object
+          properties:
+            favoritets:
+              description: お気に入りした人リスト
+              type: array
+              items:
+                $ref: '#/components/schemas/UserBase'
+            user:
+              description: ユーザ情報
+              $ref: '#/components/schemas/UserBase'
+
+  headers:
+    set-cookie:
+      description: session_id
+      schema:
+        type: string
+        example: session_id=IqVkiav4jiI%3D; Path=/; Expires=Sat, 02 Sep 2023 19:22:04 GMT; HttpOnly; SameSite=Lax
+  
+  responses:
+    '204':
+      x-summary: No Content
+      description: No Content
+      headers:
+        Set-Cookie:
+          $ref: '#/components/headers/set-cookie'
+    
+    '400':
+      x-summary: Bad Request
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                description: エラー内容リスト
+                type: array
+                items:
+                  type: string
+                  example: 'email is required'
+    
+    '401':
+      x-summary: Unauthorized
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                description: エラー内容リスト
+                type: array
+                items:
+                  type: string
+                  example: 'user is not found'
+    
+    '500':
+      x-summary: Internal Server Error
+      description: Unexpected Error
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                description: エラー内容リスト
+                type: array
+                items:
+                  type: string
+                  example: 'system error'
+    
