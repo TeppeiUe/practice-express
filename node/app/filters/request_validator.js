@@ -1,7 +1,7 @@
 const express = require('express');
 const { session } = require('../services');
 const log = require('../logs');
-
+const CommonResponse = require('../formats/CommonResponse');
 
 /**
  * cookieチェック
@@ -30,14 +30,14 @@ module.exports.cookie_check = async (req, res, next) => {
 
   if (session_id === undefined) {
     log.app.info('cookie is not found');
-    res.status(401).json({ message: ['cookie is not found'] });
+    next(new CommonResponse(401, ['cookie is not found']));
 
   } else {
     await session.search(session_id, (ret, err) => {
 
       if (err) {
         log.app.error(err.stack);
-        res.status(500).json({ message: ['system error'] });
+        next(new CommonResponse);
 
       } else {
         if (ret) {
@@ -50,7 +50,7 @@ module.exports.cookie_check = async (req, res, next) => {
           next();
 
         } else {
-          res.status(401).json({ message: ['session out'] });
+          next(new CommonResponse(401, ['session out']));
 
         }
 

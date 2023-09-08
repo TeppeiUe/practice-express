@@ -2,7 +2,7 @@ const express = require('express');
 const { sequelize, Sequelize, ...models } = require('../models');
 const log = require('../logs');
 const { tweet_validator } = require('../filters');
-
+const CommonResponse = require('../formats/CommonResponse');
 
 /**
  * API: /tweet, ツイート
@@ -24,7 +24,7 @@ module.exports.create = async (req, res, next) => {
       })
       .catch(err => {
         log.app.error(err.stack);
-        res.status(500).json({ message: ['system error'] });
+        next(new CommonResponse);
       });
 
       const { id, user_id, message, created_at } = tweet;
@@ -44,11 +44,10 @@ module.exports.create = async (req, res, next) => {
       });
 
     },
-    failure: msg_list => res.status(400).json({ message: msg_list }),
+    failure: msg_list => next(new CommonResponse(400, msg_list)),
     error: err => {
       log.app.error(err.stack);
-      res.status(500).json({ message: ['system error'] });
-
+      next(new CommonResponse);
     },
   };
 
@@ -98,7 +97,7 @@ module.exports.show = async (req, res, next) => {
       })
       .catch(err => {
         log.app.error(err.stack);
-        res.status(500).json({ message: ['system error'] });
+        next(new CommonResponse);
       });
 
       const {
@@ -127,11 +126,10 @@ module.exports.show = async (req, res, next) => {
       });
 
     },
-    failure: msg_list => res.status(400).json({ message: msg_list }),
+    failure: msg_list => next(new CommonResponse(400, msg_list)),
     error: err => {
       log.app.error(err.stack);
-      res.status(500).json({ message: ['system error'] });
-
+      next(new CommonResponse);
     },
   };
 
@@ -181,7 +179,7 @@ module.exports.index = async (req, res, next) => {
   })
   .catch(err => {
     log.app.error(err.stack);
-    res.status(500).json({ message: ['system error'] });
+    next(new CommonResponse);
   });
 
   res.json({
@@ -240,16 +238,16 @@ module.exports.delete = async (req, res, next) => {
       })
       .catch(err => {
         log.app.error(err.stack);
-        res.status(500).json({ message: ['system error'] });
+        next(new CommonResponse);
       });
 
       res.status(204).end();
 
     },
-    failure: msg_list => res.status(400).json({ message: msg_list }),
+    failure: msg_list => next(new CommonResponse(400, msg_list)),
     error: err => {
       log.app.error(err.stack);
-      res.status(500).json({ message: ['system error'] });
+      next(new CommonResponse);
     },
   }
 

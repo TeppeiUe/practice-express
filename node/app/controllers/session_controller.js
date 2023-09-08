@@ -4,7 +4,7 @@ const { Op } = models.Sequelize;
 const log = require('../logs');
 const { session }  = require('../services');
 const { session_validator } = require('../filters');
-
+const CommonResponse = require('../formats/CommonResponse');
 
 /**
  * API: /login (POST), ログイン
@@ -78,7 +78,7 @@ module.exports.create = async (req, res, next) => {
       })
       .catch(err => {
         log.app.error(err.stack);
-        res.status(500).json({ message: ['system error'] });
+        next(new CommonResponse);
       });
 
       if (user) {
@@ -86,7 +86,7 @@ module.exports.create = async (req, res, next) => {
 
           if (err) {
             log.app.error(err);
-            res.status(500).json({ message: ['system error'] });
+            next(new CommonResponse);
 
           } else {
             const { session_id, expires } = ret;
@@ -126,7 +126,8 @@ module.exports.create = async (req, res, next) => {
                   profile,
                   created_at
                 },
-                tweets: following.filter(({ tweets }) => tweets.length)
+                tweets: following
+                  .filter(({ tweets }) => tweets.length)
                   .reduce((arr, { id, user_name, image, tweets }) => [
                     ...arr, ...tweets.map(t => {
                       return {
@@ -144,23 +145,22 @@ module.exports.create = async (req, res, next) => {
                       }
                     })
                   ], user_tweets)
-                  .sort((p, c) =>
-                    p.created_at < c.created_at ? 1 : -1),              },
+                  .sort((p, c) => p.created_at < c.created_at ? 1 : -1),
+              },
             });
 
           }
 
         })
       } else {
-        res.status(401).json({ message: ['user is not found'] });
+        next(new CommonResponse(401, ['user is not found']));
 
       }
     },
-    failure: msg_list => res.status(401).json({ message: msg_list }),
+    failure: msg_list => next(new CommonResponse(401, msg_list)),
     error: err => {
       log.app.error(err.stack);
-      res.status(500).json({ message: ['system error'] });
-
+      next(new CommonResponse);
     },
   };
 
@@ -233,7 +233,7 @@ module.exports.search = async (req, res, next) => {
   })
   .catch(err => {
     log.app.error(err.stack);
-    res.status(500).json({ message: ['system error'] })
+    next(new CommonResponse);
   });
 
   if (user) {
@@ -271,7 +271,8 @@ module.exports.search = async (req, res, next) => {
           profile,
           created_at
         },
-        tweets: following.filter(({ tweets }) => tweets.length)
+        tweets: following
+          .filter(({ tweets }) => tweets.length)
           .reduce((arr, { id, user_name, image, tweets }) => [
             ...arr, ...tweets.map(t => {
               return {
@@ -289,13 +290,12 @@ module.exports.search = async (req, res, next) => {
               }
             })
           ], user_tweets)
-          .sort((p, c) =>
-            p.created_at < c.created_at ? 1 : -1),
+          .sort((p, c) => p.created_at < c.created_at ? 1 : -1),
       },
     });
 
   } else {
-    res.status(401).json({ message: ['user is not found']});
+    next(new CommonResponse(401, ['user is not found']));
   }
 
 };
@@ -314,7 +314,7 @@ module.exports.delete = async (req, res, next) => {
       await session.delete(req.cookies.session_id, (ret, err) => {
         if (err) {
           log.app.error(err);
-          res.status(500).json({ message: ['system error'] });
+          next(new CommonResponse);
 
         } else {
           session.crearCookie(res);
@@ -324,11 +324,10 @@ module.exports.delete = async (req, res, next) => {
 
       });
     },
-    failure: msg_list => res.status(401).json({ message: msg_list }),
+    failure: msg_list => next(new CommonResponse(401, msg_list)),
     error: err => {
       log.app.error(err.stack);
-      res.status(500).json({ message: ['system error'] });
-
+      next(new CommonResponse);
     },
   };
 

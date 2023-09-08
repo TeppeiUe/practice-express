@@ -3,7 +3,7 @@ const models = require('../models');
 const log = require('../logs');
 const { user_validator } = require('../filters');
 const { session } = require('../services');
-
+const CommonResponse = require('../formats/CommonResponse');
 
 /**
  * API: /user, ユーザー登録
@@ -18,14 +18,14 @@ module.exports.create = async (req, res, next) => {
       const user = await models.user.create(obj)
       .catch(err => {
         log.app.error(err.stack);
-        res.status(500).json({ message: ['system error'] });
+        next(new CommonResponse);
       });
 
       if (user) {
         await session.create(user.id, async (ret, err) => {
           if (err) {
             log.app.error(err);
-            res.status(500).json({ message: ['system error'] });
+            next(new CommonResponse);
 
           } else {
             const { session_id, expires } = ret;
@@ -53,15 +53,13 @@ module.exports.create = async (req, res, next) => {
 
         })
       } else {
-        res.status(400).json({ message: ['signup failure'] });
-
+        next(new CommonResponse(400, ['signup failure']));
       }
     },
-    failure: msg_list => res.status(400).json({ message: msg_list }),
+    failure: msg_list => next(new CommonResponse(400, msg_list)),
     error: err => {
       log.app.error(err.stack);
-      res.status(500).json({ message: ['system error'] });
-
+      next(new CommonResponse);
     },
   };
 
@@ -116,7 +114,7 @@ module.exports.show = async (req, res, next) => {
       })
       .catch(err => {
         log.app.error(err.stack);
-        res.status(500).json({ message: ['system error'] });
+        next(new CommonResponse);
       });
 
       const { id, user_name, image, profile, created_at, tweets } = user;
@@ -148,11 +146,10 @@ module.exports.show = async (req, res, next) => {
       });
 
     },
-    failure: msg_list => res.status(400).json({ message: msg_list }),
+    failure: msg_list => next(new CommonResponse(400, msg_list)),
     error: err => {
       log.app.error(err.stack);
-      res.status(500).json({ message: ['system error'] });
-
+      next(new CommonResponse);
     },
   };
 
@@ -179,16 +176,16 @@ module.exports.update = async (req, res, next) => {
       })
       .catch(err => {
         log.app.error(err.stack);
-        res.status(500).json({ message: ['system error'] });
+        next(new CommonResponse);
       });
 
       res.status(204).end();
 
     },
-    failure: msg_list => res.status(400).json({ message: msg_list }),
+    failure: msg_list => next(new CommonResponse(400, msg_list)),
     error: err => {
       log.app.error(err.stack);
-      res.status(500).json({ message: ['system error'] });
+      next(new CommonResponse);
 
     },
   };
@@ -220,7 +217,7 @@ module.exports.index = async (req, res, next) => {
   })
   .catch(err => {
     log.app.error(err.stack);
-    res.status(500).json({ message: ['system error'] });
+    next(new CommonResponse);
   });
 
   res.json({ users });

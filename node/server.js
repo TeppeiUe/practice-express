@@ -9,6 +9,7 @@ const cookieParser = require('cookie-parser');
 const { request } = require('./app/filters');
 const path = require('path');
 const cors = require('cors');
+const CommonResponse = require('./app/formats/CommonResponse');
 
 
 app.use(express.json());
@@ -48,6 +49,27 @@ app.use(cors(corsOptionsDelegate));
 app.use(request.cookie_check);
 require('./router')(app);
 
+/**
+ * 404 error handler
+ */
+app.all('*', (req, res) => {
+  log.access.error('not found');
+  res.status(404).end();
+});
+
+/**
+ * error handler
+ * @param {CommonResponse} err
+ * @param {express.Request} req
+ * @param {express.Response} res
+ * @param {express.NextFunction} next
+ */
+const errorHandler = (err, req, res, next) => {
+  log.access.error(JSON.stringify(err));
+  const { status, message } = err;
+  res.status(status).json({ message });
+};
+app.use(errorHandler);
 
 const server = (() => {
   if (WEB.TLS) {

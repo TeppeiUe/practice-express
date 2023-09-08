@@ -3,7 +3,7 @@ const models = require('../models');
 const { Op } = models.Sequelize;
 const log = require('../logs');
 const { favorite_validator } = require('../filters');
-
+const CommonResponse = require('../formats/CommonResponse');
 
 /**
  * API: /tweet/:id/favorite (POST), お気に入り登録
@@ -29,17 +29,16 @@ module.exports.create = async (req, res, next) => {
       })
       .catch(err => {
         log.app.error(err.stack);
-        res.status(500).json({ message: ['system error'] });
+        next(new CommonResponse);
       });
 
       res.status(204).end();
 
     },
-    failure: msg_list => res.status(400).json({ message: msg_list }),
+    failure: msg_list => next(new CommonResponse(400, msg_list)),
     error: err => {
       log.app.error(err.stack);
-      res.status(500).json({ message: ['system error'] });
-
+      next(new CommonResponse);
     },
   };
 
@@ -98,7 +97,7 @@ module.exports.index = async (req, res, next) => {
       })
       .catch(err => {
         log.app.error(err.stack);
-        res.status(500).json({ message: ['system error'] });
+        next(new CommonResponse);
       });
 
       const { active_favorite } = favorites;
@@ -122,11 +121,10 @@ module.exports.index = async (req, res, next) => {
       });
 
     },
-    failure: msg_list => res.status(400).json({ message: msg_list }),
+    failure: msg_list => next(new CommonResponse(400, msg_list)),
     error: err => {
       log.app.error(err.stack);
-      res.status(500).json({ message: ['system error'] });
-
+      next(new CommonResponse);
     },
   };
 
@@ -155,21 +153,20 @@ module.exports.delete = async (req, res, next) => {
       })
       .catch(err => {
         log.app.error(err.stack);
-        res.status(500).json({ message: ['system error'] });
+        next(new CommonResponse);
       });
 
       if (favorite) {
         res.status(204).end();
       } else {
-        res.status(400).json({ message: ['favorite tweet is not found']});
+        next(new CommonResponse(400, ['favorite tweet is not found']));
       }
 
     },
-    failure: msg_list => res.status(400).json({ message: msg_list }),
+    failure: msg_list => next(new CommonResponse(400, msg_list)),
     error: err => {
       log.app.error(err.stack);
-      res.status(500).json({ message: ['system error'] });
-
+      next(new CommonResponse);
     },
   };
 

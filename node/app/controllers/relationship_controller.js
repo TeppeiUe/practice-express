@@ -3,7 +3,7 @@ const models = require('../models');
 const { Op } = models.Sequelize;
 const log = require('../logs');
 const { relation_validator } = require('../filters');
-
+const CommonResponse = require('../formats/CommonResponse');
 
 /**
  * API: /user/:id/following (POST), フォロー
@@ -29,20 +29,20 @@ module.exports.create = async (req, res, next) => {
       })
       .catch(err => {
         log.app.error(err);
-        res.status(500).json({ message: ['system error'] });
+        next(new CommonResponse);
       });
 
       if (created) {
         res.status(204).end();
       } else {
-        res.status(400).json({ message: ['already follow this user'] });
+        next(new CommonResponse(400, ['already follow this user']));
       }
 
     },
-    failure: msg_list => res.status(400).json({ message: msg_list }),
+    failure: msg_list => next(new CommonResponse(400, msg_list)),
     error: err => {
       log.app.error(err.stack);
-      res.status(500).json({ message: ['system error'] });
+      next(new CommonResponse);
 
     },
   };
@@ -81,7 +81,7 @@ module.exports.followings = async (req, res, next) => {
       })
       .catch(err => {
         log.app.error(err);
-        res.status(500).json({ message: ['system error'] });
+        next(new CommonResponse);
       });
 
       res.json({
@@ -91,11 +91,10 @@ module.exports.followings = async (req, res, next) => {
         ),
       });
     },
-    failure: msg_list => res.status(400).json({ message: msg_list }),
+    failure: msg_list => next(new CommonResponse(400, msg_list)),
     error: err => {
       log.app.error(err.stack);
-      res.status(500).json({ message: ['system error'] });
-
+      next(new CommonResponse);
     },
   };
 
@@ -133,7 +132,7 @@ module.exports.followers = async (req, res, next) => {
       })
       .catch(err => {
         log.app.error(err);
-        res.status(500).json({ message: ['system error'] });
+        next(new CommonResponse);
       });
 
       res.json({
@@ -144,11 +143,10 @@ module.exports.followers = async (req, res, next) => {
       });
 
     },
-    failure: msg_list => res.status(400).json({ message: msg_list }),
+    failure: msg_list => next(new CommonResponse(400, msg_list)),
     error: err => {
       log.app.error(err.stack);
-      res.status(500).json({ message: ['system error'] });
-
+      next(new CommonResponse);
     },
   };
 
@@ -177,20 +175,19 @@ module.exports.followers = async (req, res, next) => {
       })
       .catch(err => {
         log.app.error(err.stack);
-        res.status(500).json({ message: ['system error'] });
+        next(new CommonResponse);
       });
 
       if (following) {
         res.status(204).end();
       } else {
-        res.status(400).json({ message: ['cannot delete'] });
+        next(new CommonResponse(400, ['cannot delete']));
       }
     },
-    failure: msg_list => res.status(400).json({ message: msg_list }),
+    failure: msg_list => next(new CommonResponse(400, msg_list)),
     error: err => {
       log.app.error(err.stack);
-      res.status(500).json({ message: ['system error'] });
-
+      next(new CommonResponse);
     },
   };
 
