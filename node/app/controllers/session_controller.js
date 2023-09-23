@@ -90,24 +90,13 @@ module.exports.search = async (req, res, next) => {
  * @param {express.NextFunction} next
  */
 module.exports.delete = async (req, res, next) => {
-  const callback = {
-    success: async () => {
-      await session.delete(req.cookies.session_id, (ret, err) => {
-        if (err) {
-          log.app.error(err);
-          next(new CommonResponse);
-        } else {
-          session.crearCookie(res);
-          res.status(204).end();
-        }
-      });
-    },
-    failure: msg_list => next(new CommonResponse(401, msg_list)),
-    error: err => {
+  await session.delete(req.cookies.session_id, (_, err) => {
+    if (err) {
       log.app.error(err.stack);
       next(new CommonResponse);
-    },
-  };
-
-  session_validator.delete(req, res, callback);
+    } else {
+      session.crearCookie(res);
+      res.status(204).end();
+    }
+  });
 };

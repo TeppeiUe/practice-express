@@ -1,5 +1,7 @@
 const express = require('express');
 const { check } = require('../services');
+const { tweet } = require('../models');
+const ValidationError = require('../formats/ValidationError');
 
 
 /**
@@ -9,33 +11,32 @@ const { check } = require('../services');
  * @param {callback} callback
  */
  module.exports.create = async (req, res, callback) => {
-
   const tweet_id = req.params.id;
-  let err_msg = [];
+  const { user_id } = res.locals;
 
   try {
-    // pathに:idが存在しない場合404返却のため、存在性チェックは不要
-    if (!check.isPositiveInteger(tweet_id)) {
-      err_msg.push('tweet_id is not positive integer');
-    } else
-    if (!(await check.tweetExist(tweet_id))) {
-      err_msg.push('tweet is not found');
-    }
+    /** path parameterの検証 */
+    check.pathParameter(tweet_id);
+    // 対象tweetの存在チェック
+    await tweet.findByPk(tweet_id)
+    .then(t => {
+      if (!t) {
+        throw new ValidationError('tweet is not found');
+      }
+    });
 
-    if (err_msg.length) {
-      callback.failure(err_msg);
-    } else {
-      callback.success({
-        user_id: res.locals.user_id,
-        ...{ tweet_id }
-      });
-    }
+    callback.success({
+      user_id,
+      tweet_id,
+    });
 
   } catch (err) {
-    callback.error(err);
-
+    if (err instanceof ValidationError) {
+      callback.failure([err.message]);
+    } else {
+      callback.error(err);
+    }
   }
-
 };
 
 
@@ -46,27 +47,21 @@ const { check } = require('../services');
  * @param {callback} callback
  */
  module.exports.index = (req, res, callback) => {
-
   const { id } = req.params;
-  let err_msg = [];
 
   try {
-    // pathに:idが存在しない場合404返却のため、存在性チェックは不要
-    if (!check.isPositiveInteger(id)) {
-      err_msg.push('user_id is not positive integer');
-    }
+    /** path parameterの検証 */
+    check.pathParameter(id);
 
-    if (err_msg.length) {
-      callback.failure(err_msg);
-    } else {
-      callback.success({ id });
-    }
+    callback.success({ id });
 
   } catch (err) {
-    callback.error(err);
-
+    if (err instanceof ValidationError) {
+      callback.failure([err.message]);
+    } else {
+      callback.error(err);
+    }
   }
-
 };
 
 
@@ -77,43 +72,31 @@ const { check } = require('../services');
  * @param {callback} callback
  */
  module.exports.delete = (req, res, callback) => {
-
   const tweet_id = req.params.id;
-  let err_msg = [];
+  const { user_id } = res.locals;
 
   try {
-    // pathに:idが存在しない場合404返却のため、存在性チェックは不要
-    if (!check.isPositiveInteger(tweet_id)) {
-      err_msg.push('tweet_id is not positive integer');
-    }
+    /** path parameterの検証 */
+    check.pathParameter(tweet_id);
 
-    if (err_msg.length) {
-      callback.failure(err_msg);
-    } else {
-      callback.success({
-        user_id: res.locals.user_id,
-        ...{ tweet_id }
-      });
-    }
+    callback.success({
+      user_id,
+      tweet_id,
+    });
 
   } catch (err) {
-    callback.error(err);
-
+    if (err instanceof ValidationError) {
+      callback.failure([err.message]);
+    } else {
+      callback.error(err);
+    }
   }
-
 };
 
 /**
- * callback関数定義
- * @typedef {object} callback
- * @prop {SuccessFunction} success
- * @prop {FailureFunction} failure
- * @prop {ErrorFunction} error
- */
-
-/**
- * callback関数メソッド
- * @typedef {function(object): ServerResponse} SuccessFunction
- * @typedef {function(string[]): ServerResponse} FailureFunction
- * @typedef {function(any): ServerResponse} ErrorFunction
+ * validationコールバック
+ * @callback callback
+ * @param {function(any): void} success
+ * @param {function(string[]): void} failure
+ * @param {function(any): void} error
  */

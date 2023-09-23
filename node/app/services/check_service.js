@@ -1,96 +1,64 @@
-const { user, tweet } = require('../models');
-
+const { user } = require('../models');
+const ValidationError = require('../formats/ValidationError');
 
 /**
- * 未定義以外の空のチェック
+ * 存在チェック
  * @param {any} val
- * @returns {boolean}
+ * @param {string} field
  */
- module.exports.isEmpty = val => {
-  if (val === null) return true
-  if (Array.isArray(val)) return Boolean(val.length)
-  return typeof val !== 'string' ? false : !Boolean(val.length);
-};
-
+module.exports.isRequired = (val, field) => {
+  if (val === undefined ||
+    val === null ||
+    (typeof val === 'string' && val === '')
+  ) {
+    throw new ValidationError(`${field} is required`);
+  }
+}
 
 /**
- * 正の整数のチェック
- * @param {any} val
- * @returns {boolean}
+ * user_name check
+ * @param {string | number} user_name
+ * @param {number | null} user_id
  */
-module.exports.isPositiveInteger = val => {
-  const num = Number(val);
-  if (num === undefined) return false
-  return Number.isInteger(num) ? 1 <= val : false
-};
+module.exports.userName = async (user_name, user_id = null) => {
+  const field = 'user_name';
+  this.isRequired(user_name, field);
+  this.wordCount(user_name, field, 1, 16);
 
+  // user_nameのunique検証
+  await user.findOne({
+    where: { user_name },
+  })
+  .then(u => {
+    if ((user_id && u && u.id !== Number(user_id)) || (!user_id && u)) {
+      throw new ValidationError(`${field} is already exist`);
+    }
+  });
+}
 
 /**
- * 文字列チェック
- * @param {any} val
- * @returns {boolean}
- */
-module.exports.isString = val => typeof val === 'string';
-
-
-/**
- * 文字列の文字数チェック
- * @param {any} val
- * @param {number} mi
- * @param {number} max
- * @returns {boolean}
- */
-module.exports.isStringWithinRange = (val, min, max) => {
-  const len = this.isEmpty(val) && this.isString(val) ? 0 : val.length;
-  return min <= len && len <= max
-};
-
-
-/**
- * メールアドレスチェック
+ * path parameter check
  * @param {string} val
  * @returns {boolean}
  */
-module.exports.isMailAddress = val => val === undefined ? false : val.match(/.+@.+\..+/);
-
-
-/**
- * ユーザーの存在チェック
- * @param {number|string} id
- * @returns {boolean}
- */
-module.exports.userExist = async id => !!(await user.findByPk(id));
-
-
-/**
- * ユーザー名の存在チェック(unique検証)
- * @param {string} user_name
- * @returns {number|null} ユーザーIDかnullを返却
- */
-module.exports.userNameExist = async user_name => {
-  const res = await user.findOne({
-    where: { user_name }
-  });
-  return res ? res.id : null
+module.exports.pathParameter = val => {
+  // pathに:idが存在しない場合404返却のため、存在性チェックは不要
+  if (!val.match(/^[1-9]\d*$/)) {
+    throw new ValidationError('Invalid parameter');
+  }
 };
 
-
 /**
- * メールアドレスの存在チェック(unique検証)
- * @param {string} email
- * @returns {number|null} ユーザーIDかnullを返却
- */
-module.exports.emailExist = async email => {
-  const res = await user.findOne({
-    where: { email }
-  });
-  return res ? res.id : null
-};
-
-
-/**
- * ツイートの存在チェック
- * @param {string|number} id
+ * word count check
+ * @param {string | number} val
+ * @param {string} field
+ * @param {number} min
+ * @param {number} max
  * @returns {boolean}
  */
-module.exports.tweetExist = async id => !!(await tweet.findByPk(id));
+module.exports.wordCount = (val, field, min, max) => {
+  const len = val.length;
+  if (min > len || len > max) {
+    throw new ValidationError(`${field} must be between ${min} and ${max} characters`);
+  }
+};

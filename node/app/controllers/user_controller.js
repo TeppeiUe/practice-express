@@ -62,8 +62,8 @@ module.exports.create = async (req, res, next) => {
  */
 module.exports.show = async (req, res, next) => {
   const callback = {
-    success: async () => {
-      const user = await models.user.findByPk(req.params.id, {
+    success: async ({ id }) => {
+      const user = await models.user.findByPk(id, {
         include: {
           model: models.tweet,
           order,
