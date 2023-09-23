@@ -50,7 +50,7 @@ module.exports.create = async (req, res, next) => {
     },
   };
 
-  user_validator.create(req, callback);
+  user_validator.create(req, res, callback);
 };
 
 
@@ -91,7 +91,7 @@ module.exports.show = async (req, res, next) => {
     },
   };
 
-  user_validator.show(req, callback);
+  user_validator.show(req, res, callback);
 };
 
 
@@ -124,7 +124,7 @@ module.exports.update = async (req, res, next) => {
     },
   };
 
-  user_validator.update(req, callback);
+  user_validator.update(req, res, callback);
 };
 
 

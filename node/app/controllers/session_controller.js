@@ -56,7 +56,7 @@ module.exports.create = async (req, res, next) => {
     },
   };
 
-  session_validator.create(req, callback);
+  session_validator.create(req, res, callback);
 };
 
 
@@ -109,5 +109,5 @@ module.exports.delete = async (req, res, next) => {
     },
   };
 
-  session_validator.delete(req, callback);
+  session_validator.delete(req, res, callback);
 };

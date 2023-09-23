@@ -4,10 +4,11 @@ const { check } = require('../services');
 
 /**
  * API: /user/:id/following (POST), フォロー
+ * @param {express.Response} res
  * @param {express.Request} req
  * @param {callback} callback
  */
- module.exports.create = async (req, callback) => {
+ module.exports.create = async (req, res, callback) => {
 
   const follow_id = req.params.id; // フォローする相手
   const { user_id } = res.locals; // 自分
@@ -46,10 +47,11 @@ const { check } = require('../services');
 
 /**
  * API: /user/:id/(followings, followers), (フォロー, フォロワー)一覧
+ * @param {express.Response} res
  * @param {express.Request} req
  * @param {callback} callback
  */
- module.exports.index = (req, callback) => {
+ module.exports.index = (req, res, callback) => {
 
   const { id } = req.params;
   let err_msg = [];
@@ -81,10 +83,11 @@ const { check } = require('../services');
 
 /**
  * API: /user/:id/following (DELETE), フォロー削除
+ * @param {express.Response} res
  * @param {express.Request} req
  * @param {callback} callback
  */
- module.exports.delete = async (req, callback) => {
+ module.exports.delete = async (req, res, callback) => {
 
   const follow_id = req.params.id; // フォロー削除する相手
   let err_msg = [];

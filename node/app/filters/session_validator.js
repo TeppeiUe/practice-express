@@ -4,10 +4,11 @@ const { WEB } = require('config');
 
 /**
  * API: /login (POST), ログイン
+ * @param {express.Response} res
  * @param {express.Request} req
  * @param {callback} callback
  */
-module.exports.create = (req, callback) => {
+module.exports.create = (req, res, callback) => {
 
   let { email, password } = req.body;
   let err_msg = [];
@@ -52,10 +53,11 @@ module.exports.create = (req, callback) => {
 
 /**
  * API: /logout (DELETE), ログアウト
+ * @param {express.Response} res
  * @param {express.Request} req
  * @param {callback} callback
  */
-module.exports.delete = (req, callback) => {
+module.exports.delete = (req, res, callback) => {
 
   const { session_id } = req.cookies;
   let err_msg = [];

@@ -48,7 +48,7 @@ module.exports.create = async (req, res, next) => {
     },
   };
 
-  relation_validator.create(req, callback);
+  relation_validator.create(req, res, callback);
 };
 
 
@@ -85,7 +85,7 @@ module.exports.followings = async (req, res, next) => {
     },
   };
 
-  relation_validator.index(req, callback);
+  relation_validator.index(req, res, callback);
 }
 
 
@@ -122,7 +122,7 @@ module.exports.followers = async (req, res, next) => {
     },
   };
 
-  relation_validator.index(req, callback);
+  relation_validator.index(req, res, callback);
 }
 
 
@@ -161,5 +161,5 @@ module.exports.delete = async (req, res, next) => {
     },
   };
 
-  relation_validator.delete(req, callback);
+  relation_validator.delete(req, res, callback);
 };

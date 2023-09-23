@@ -5,10 +5,11 @@ const { WEB } = require('config');
 
 /**
  * API: /user (POST), ユーザー登録
+ * @param {express.Response} res
  * @param {express.Request} req
  * @param {callback} callback
  */
- module.exports.create = async (req, callback) => {
+ module.exports.create = async (req, res, callback) => {
 
   let { user_name, email, password } = req.body;
   let err_msg = [];
@@ -72,10 +73,11 @@ const { WEB } = require('config');
 
 /**
  * API: /user/:id, ユーザー情報
+ * @param {express.Response} res
  * @param {express.Request} req
  * @param {callback} callback
  */
-module.exports.show = (req, callback) => {
+module.exports.show = (req, res, callback) => {
 
   const { id } = req.params;
   let err_msg = [];
@@ -108,10 +110,11 @@ module.exports.show = (req, callback) => {
 
 /**
  * API: /user (PUT), ユーザー情報更新
+ * @param {express.Response} res
  * @param {express.Request} req
  * @param {callback} callback
  */
-module.exports.update = async (req, callback) => {
+module.exports.update = async (req, res, callback) => {
 
   const { user_name, profile, image } = req.body;
   const { user_id } = res.locals;

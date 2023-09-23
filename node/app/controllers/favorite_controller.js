@@ -44,7 +44,7 @@ module.exports.create = async (req, res, next) => {
     },
   };
 
-  favorite_validator.create(req, callback);
+  favorite_validator.create(req, res, callback);
 };
 
 
@@ -94,7 +94,7 @@ module.exports.index = async (req, res, next) => {
     },
   };
 
-  favorite_validator.index(req, callback);
+  favorite_validator.index(req, res, callback);
 }
 
 
@@ -134,5 +134,5 @@ module.exports.delete = async (req, res, next) => {
     },
   };
 
-  favorite_validator.delete(req, callback);
+  favorite_validator.delete(req, res, callback);
 };

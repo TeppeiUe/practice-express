@@ -4,10 +4,11 @@ const { check } = require('../services');
 
 /**
  * API: /tweet/:id/favorite (POST), お気に入り登録
+ * @param {express.Response} res
  * @param {express.Request} req
  * @param {callback} callback
  */
- module.exports.create = async (req, callback) => {
+ module.exports.create = async (req, res, callback) => {
 
   const tweet_id = req.params.id;
   let err_msg = [];
@@ -45,10 +46,11 @@ const { check } = require('../services');
 
 /**
  * API: /user/:id/favorites , お気に入りツイート一覧
+ * @param {express.Response} res
  * @param {express.Request} req
  * @param {callback} callback
  */
- module.exports.index = (req, callback) => {
+ module.exports.index = (req, res, callback) => {
 
   const { id } = req.params;
   let err_msg = [];
@@ -80,10 +82,11 @@ const { check } = require('../services');
 
 /**
  * API: /tweet/:id/favorite (DELETE), お気に入り削除
+ * @param {express.Response} res
  * @param {express.Request} req
  * @param {callback} callback
  */
- module.exports.delete = (req, callback) => {
+ module.exports.delete = (req, res, callback) => {
 
   const tweet_id = req.params.id;
   let err_msg = [];

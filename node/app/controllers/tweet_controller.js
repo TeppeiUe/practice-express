@@ -37,7 +37,7 @@ module.exports.create = async (req, res, next) => {
     },
   };
 
-  tweet_validator.create(req, callback);
+  tweet_validator.create(req, res, callback);
 };
 
 
@@ -80,7 +80,7 @@ module.exports.show = async (req, res, next) => {
     },
   };
 
-  tweet_validator.show(req, callback);
+  tweet_validator.show(req, res, callback);
 };
 
 
@@ -214,5 +214,5 @@ module.exports.delete = async (req, res, next) => {
     },
   }
 
-  tweet_validator.delete(req, callback);
+  tweet_validator.delete(req, res, callback);
 };
