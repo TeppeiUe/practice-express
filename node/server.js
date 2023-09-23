@@ -45,11 +45,9 @@ const corsOptionsDelegate = (req, callback) => {
 };
 app.use(cors(corsOptionsDelegate));
 
-require('./router')(app);
-
-/**
- * 404 error handler
- */
+// router
+app.use(WEB.CONTEXT_PATH, require('./router'));
+// 404 error handler
 app.all('*', (req, res) => {
   log.access.error('not found');
   res.status(404).end();

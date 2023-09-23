@@ -12,6 +12,7 @@ module.exports = {
   WEB: {
     PORT: NODE_PORT,
     TLS: false,
+    CONTEXT_PATH: '/',
     CORS: {
       ALLOW_ORIGINS: [
         'http://localhost:4200',

@@ -1,33 +1,112 @@
 const express = require('express');
+const router = express.Router();
 const { request } = require('./app/filters');
 const controllers = require('./app/controllers');
 
 /**
- * ルーティング管理
- * @param {express.Express} app
+ * セッション管理
  */
-module.exports = app => {
-  app.post('/login', controllers.session.create);
-  app.delete('/logout',request.cookie_check, controllers.session.delete);
-  app.post('/session', request.cookie_check, controllers.session.search);
+// ログインAPI
+router.post('/login',
+  controllers.session.create
+);
+// ログアウトAPI
+router.delete('/logout',
+  request.cookie_check,
+  controllers.session.delete
+);
+// セッション確認API
+router.post('/session',
+  request.cookie_check,
+  controllers.session.search
+);
 
-  app.post('/user', controllers.user.create);
-  app.get('/user/:id', controllers.user.show);
-  app.put('/user', request.cookie_check, controllers.user.update);
-  app.get('/users', controllers.user.index);
+/**
+ * ユーザ機能
+ */
+// ユーザ登録API
+router.post('/user',
+  controllers.user.create
+);
+// ユーザ詳細取得API
+router.get('/user/:id',
+  controllers.user.show
+);
+// ユーザ更新API
+router.put('/user',
+  request.cookie_check,
+  controllers.user.update
+);
+// ユーザ一覧取得API
+router.get('/users',
+  controllers.user.index
+);
 
-  app.get('/user/:id/favorites', controllers.favorite.index);
-  app.get('/user/:id/followings', controllers.relation.followings);
-  app.get('/user/:id/followers', controllers.relation.followers);
-  app.post('/user/:id/following', request.cookie_check, controllers.relation.create);
-  app.delete('/user/:id/following', request.cookie_check, controllers.relation.delete);
+/**
+ * フォロー機能
+ */
+// フォロー一覧取得API
+router.get('/user/:id/followings',
+  controllers.relation.followings
+);
+// フォロワー一覧取得API
+router.get('/user/:id/followers',
+  controllers.relation.followers
+);
+// フォロー登録
+router.post('/user/:id/following',
+  request.cookie_check,
+  controllers.relation.create
+);
+// フォロー削除
+router.delete('/user/:id/following',
+  request.cookie_check,
+  controllers.relation.delete
+);
 
-  app.post('/tweet', request.cookie_check, controllers.tweet.create);
-  app.get('/tweet/:id', controllers.tweet.show);
-  app.delete('/tweet/:id', request.cookie_check, controllers.tweet.delete);
-  app.get('/tweets', controllers.tweet.index);
-  app.get('/tweets/user', request.cookie_check, controllers.tweet.home);
+/**
+ * ツイート機能
+ */
+// ツイートAPI
+router.post('/tweet',
+  request.cookie_check,
+  controllers.tweet.create
+);
+// ツイート詳細取得API
+router.get('/tweet/:id',
+  controllers.tweet.show
+);
+// ツイート削除API
+router.delete('/tweet/:id',
+  request.cookie_check,
+  controllers.tweet.delete
+);
+// ツイート一覧API
+router.get('/tweets',
+  controllers.tweet.index
+);
+// ツイート一覧（ログインユーザ）
+router.get('/tweets/user',
+  request.cookie_check,
+  controllers.tweet.home
+);
 
-  app.post('/tweet/:id/favorite', request.cookie_check, controllers.favorite.create);
-  app.delete('/tweet/:id/favorite', request.cookie_check, controllers.favorite.delete);
-};
+/**
+ * お気に入り機能
+ */
+// お気に入り登録API
+router.post('/tweet/:id/favorite',
+  request.cookie_check,
+  controllers.favorite.create
+);
+// お気に入り削除API
+router.delete('/tweet/:id/favorite',
+  request.cookie_check,
+  controllers.favorite.delete
+);
+// お気に入り一覧取得API
+router.get('/user/:id/favorites',
+  controllers.favorite.index
+);
+
+module.exports = router;
