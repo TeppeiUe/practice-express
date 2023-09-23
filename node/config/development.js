@@ -51,7 +51,22 @@ module.exports = {
       port: DB_PORT,
       dialect: 'postgres',
       timezone: '+09:00',
-    }
+    },
+    COMMON_TABLE: {
+      order: [
+        ['created_at', 'desc'],
+      ],
+    },
+    USER_TABLE: {
+      // 属性を指定しない場合全カラムが返却につき、安全のため指定すること
+      attributes: [
+        'id',
+        'user_name',
+        'image',
+        'profile',
+        'created_at',
+      ],
+    },
   },
   LOG: {
     LEVEL: 'all',

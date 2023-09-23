@@ -1,8 +1,14 @@
 const express = require('express');
-const { sequelize, Sequelize, ...models } = require('../models');
+const models = require('../models');
+const { Op } = models.Sequelize;
 const log = require('../logs');
 const { tweet_validator } = require('../filters');
 const CommonResponse = require('../formats/CommonResponse');
+const TweetBaseModel = require('../formats/TweetBaseModel');
+const TweetResponse = require('../formats/TweetResponse');
+const { DB } = require('config');
+const { attributes } = DB.USER_TABLE;
+const { order } = DB.COMMON_TABLE;
 
 /**
  * API: /tweet, ツイート
@@ -11,38 +17,18 @@ const CommonResponse = require('../formats/CommonResponse');
  * @param {express.NextFunction} next
  */
 module.exports.create = async (req, res, next) => {
-
   const callback = {
     success: async obj => {
-      const tweet = await models.tweet.create(obj, {
-        attributes: [
-          'id',
-          'user_id',
-          'message',
-          'created_at'
-        ],
-      })
+      const tweet = await models.tweet.create(obj)
       .catch(err => {
         log.app.error(err.stack);
         next(new CommonResponse);
       });
 
-      const { id, user_id, message, created_at } = tweet;
-
-      res.location('/tweet/' + id);
-
+      res.location(`/tweet/${tweet.id}`);
       res.status(201).json({
-        tweet: {
-          ...{
-            id,
-            user_id,
-            message,
-            created_at,
-          },
-          favorites: [],
-        }
+        tweet: new TweetBaseModel(tweet),
       });
-
     },
     failure: msg_list => next(new CommonResponse(400, msg_list)),
     error: err => {
@@ -52,7 +38,6 @@ module.exports.create = async (req, res, next) => {
   };
 
   tweet_validator.create(req, callback);
-
 };
 
 
@@ -63,35 +48,19 @@ module.exports.create = async (req, res, next) => {
  * @param {express.NextFunction} next
  */
 module.exports.show = async (req, res, next) => {
-
   const callback = {
     success: async obj => {
       const tweet = await models.tweet.findOne({
         include: [
           {
             model: models.user,
-            attributes: [
-              'id',
-              'user_name',
-              'image'
-            ],
+            attributes,
           },
           {
             model: models.user,
             as: 'passive_favorite',
-            attributes: [
-              'id',
-              'user_name',
-              'image',
-              'profile'
-            ],
+            attributes,
           }
-        ],
-        attributes: [
-          'id',
-          'message',
-          'user_id',
-          'created_at'
         ],
         where: obj,
       })
@@ -100,31 +69,9 @@ module.exports.show = async (req, res, next) => {
         next(new CommonResponse);
       });
 
-      const {
-        id,
-        user_id,
-        message,
-        created_at,
-        user,
-        passive_favorite
-      } = tweet;
-
       res.json({
-        tweet: {
-          ...{
-            id,
-            user_id,
-            message,
-            created_at,
-            user,
-          },
-          favorites: passive_favorite.map(
-            ({ id, user_name, image, profile }) =>
-            ({ id, user_name, image, profile })
-          ),
-        },
+        tweet: new TweetResponse(tweet),
       });
-
     },
     failure: msg_list => next(new CommonResponse(400, msg_list)),
     error: err => {
@@ -134,7 +81,6 @@ module.exports.show = async (req, res, next) => {
   };
 
   tweet_validator.show(req, callback);
-
 };
 
 
@@ -145,37 +91,19 @@ module.exports.show = async (req, res, next) => {
  * @param {express.NextFunction} next
  */
 module.exports.index = async (req, res, next) => {
-
   const tweets = await models.tweet.findAll({
     include: [
       {
         model: models.user,
-        attributes: [
-          'id',
-          'user_name',
-          'image'
-        ]
+        attributes,
       },
       {
         model: models.user,
         as: 'passive_favorite',
-        attributes: [
-          'id',
-          'user_name',
-          'image',
-          'profile'
-        ]
+        attributes,
       }
     ],
-    attributes: [
-      'id',
-      'user_id',
-      'message',
-      'created_at',
-    ],
-    order: [
-      ['created_at', 'desc']
-    ],
+    order,
   })
   .catch(err => {
     log.app.error(err.stack);
@@ -183,23 +111,8 @@ module.exports.index = async (req, res, next) => {
   });
 
   res.json({
-    tweets: tweets.map(
-      ({ id, user_id, message, created_at, user, passive_favorite }) => ({
-        ...{
-          id,
-          user_id,
-          message,
-          created_at,
-          user,
-        },
-        favorites: passive_favorite.map(
-          ({ id, user_name, image, profile }) =>
-          ({ id, user_name, image, profile })
-        ),
-      })
-    ),
+    tweets: tweets.map(tweet => new TweetResponse(tweet)),
   });
-
 };
 
 
@@ -210,13 +123,12 @@ module.exports.index = async (req, res, next) => {
  * @param {express.NextFunction} next
  */
 module.exports.delete = async (req, res, next) => {
-
   const callback = {
     success: async ({ tweet_id, user_id }) => {
-      await sequelize.transaction(async t => {
+      await models.sequelize.transaction(async t => {
         const tweet = await models.tweet.findOne({
           where: {
-            [Sequelize.Op.and]: [
+            [Op.and]: [
               { id: tweet_id },
               { user_id }
             ]
@@ -242,7 +154,6 @@ module.exports.delete = async (req, res, next) => {
       });
 
       res.status(204).end();
-
     },
     failure: msg_list => next(new CommonResponse(400, msg_list)),
     error: err => {
@@ -252,5 +163,4 @@ module.exports.delete = async (req, res, next) => {
   }
 
   tweet_validator.delete(req, callback);
-
 };
