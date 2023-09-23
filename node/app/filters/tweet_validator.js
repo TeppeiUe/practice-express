@@ -9,7 +9,7 @@ const ValidationError = require('../formats/ValidationError');
  * @param {express.Request} req
  * @param {callback} callback
  */
- module.exports.create = (req, res, callback) => {
+module.exports.create = (req, res, callback) => {
   const { message } = req.body;
   const user_id = res.locals.user.id;
 
@@ -39,7 +39,7 @@ const ValidationError = require('../formats/ValidationError');
  * @param {express.Request} req
  * @param {callback} callback
  */
- module.exports.show = (req, res, callback) => {
+module.exports.show = (req, res, callback) => {
   const { id } = req.params;
 
   try {
@@ -64,7 +64,7 @@ const ValidationError = require('../formats/ValidationError');
  * @param {express.Request} req
  * @param {callback} callback
  */
- module.exports.delete = (req, res, callback) => {
+module.exports.delete = (req, res, callback) => {
   const tweet_id = req.params.id;
   const user_id = res.locals.user.id;
 
