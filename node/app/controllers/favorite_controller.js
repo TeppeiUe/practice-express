@@ -1,6 +1,5 @@
 const express = require('express');
 const models = require('../models');
-const { Op } = models.Sequelize;
 const log = require('../logs');
 const { favorite_validator } = require('../filters');
 const CommonResponse = require('../formats/CommonResponse');
@@ -17,18 +16,10 @@ const { order } = DB.COMMON_TABLE;
  */
 module.exports.create = async (req, res, next) => {
   const callback = {
-    success: async ({ user_id, tweet_id }) => {
+    success: async obj => {
       await models.favorite.findOrCreate({
-        where: {
-          [Op.and]: [
-            { user_id },
-            { tweet_id }
-          ]
-        },
-        defaults: {
-          user_id,
-          tweet_id
-        }
+        where: obj,
+        defaults: obj,
       })
       .catch(err => {
         log.app.error(err.stack);
@@ -107,14 +98,9 @@ module.exports.index = async (req, res, next) => {
 module.exports.delete = async (req, res, next) => {
 
   const callback = {
-    success: async ({ user_id, tweet_id }) => {
+    success: async obj => {
       const favorite = await models.favorite.destroy({
-        where: {
-          [Op.and]: [
-            { user_id },
-            { tweet_id }
-          ]
-        }
+        where: obj,
       })
       .catch(err => {
         log.app.error(err.stack);

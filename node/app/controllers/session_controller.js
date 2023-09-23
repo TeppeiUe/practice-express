@@ -1,6 +1,5 @@
 const express = require('express');
 const models = require('../models');
-const { Op } = models.Sequelize;
 const log = require('../logs');
 const { session }  = require('../services');
 const { session_validator } = require('../filters');
@@ -17,14 +16,9 @@ const { attributes } = DB.USER_TABLE;
  */
 module.exports.create = async (req, res, next) => {
   const callback = {
-    success: async ({ email, password }) => {
+    success: async obj => {
       const user = await models.user.findOne({
-        where: {
-          [Op.and]: [
-            { email },
-            { password }
-          ]
-        },
+        where: obj,
         attributes,
       })
       .catch(err => {

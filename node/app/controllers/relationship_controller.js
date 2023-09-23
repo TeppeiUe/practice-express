@@ -1,6 +1,5 @@
 const express = require('express');
 const models = require('../models');
-const { Op } = models.Sequelize;
 const log = require('../logs');
 const { relation_validator } = require('../filters');
 const CommonResponse = require('../formats/CommonResponse');
@@ -17,18 +16,10 @@ const { order } = DB.COMMON_TABLE;
  */
 module.exports.create = async (req, res, next) => {
   const callback = {
-    success: async ({ follow_id, user_id }) => {
+    success: async obj => {
       const [_, created] = await models.relationship.findOrCreate({
-        where: {
-          [Op.and] : [
-            { follow_id },
-            { user_id }
-          ]
-        },
-        defaults: {
-          follow_id,
-          user_id
-        }
+        where: obj,
+        defaults: obj,
       })
       .catch(err => {
         log.app.error(err);
@@ -134,14 +125,9 @@ module.exports.followers = async (req, res, next) => {
  */
 module.exports.delete = async (req, res, next) => {
   const callback = {
-    success: async ({ follow_id, user_id }) => {
+    success: async obj => {
       const following = await models.relationship.destroy({
-        where: {
-          [Op.and]: [
-            { follow_id },
-            { user_id }
-          ]
-        }
+        where: obj,
       })
       .catch(err => {
         log.app.error(err.stack);

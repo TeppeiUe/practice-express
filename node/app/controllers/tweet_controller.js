@@ -1,6 +1,5 @@
 const express = require('express');
 const models = require('../models');
-const { Op } = models.Sequelize;
 const log = require('../logs');
 const { tweet_validator } = require('../filters');
 const CommonResponse = require('../formats/CommonResponse');
@@ -180,10 +179,8 @@ module.exports.delete = async (req, res, next) => {
       await models.sequelize.transaction(async t => {
         const tweet = await models.tweet.findOne({
           where: {
-            [Op.and]: [
-              { id: tweet_id },
-              { user_id }
-            ]
+            id: tweet_id,
+            ...{ user_id },
           }
         }, {
           transaction: t
