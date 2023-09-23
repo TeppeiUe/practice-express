@@ -12,41 +12,29 @@ const CommonResponse = require('../formats/CommonResponse');
  */
 module.exports.cookie_check = async (req, res, next) => {
   const { path, method, cookies } = req;
+  const { session_id } = cookies;
 
   log.access.info(`request url=[${path}] method=[${method}]`);
 
-  const { session_id } = cookies;
-
   if (session_id === undefined) {
-    log.app.info('cookie is not found');
-    next(new CommonResponse(401, ['cookie is not found']));
+    next(new CommonResponse(401, ['cookie is required']));
 
   } else {
     await session.search(session_id, (ret, err) => {
-
       if (err) {
         log.app.error(err.stack);
         next(new CommonResponse);
-
       } else {
         if (ret) {
-          const { user_id, expires } = ret;
+          const { user, expires } = ret;
           session.setCookie(res, session_id, expires);
-
-          // 後続のミドルウェアで使用予定
-          res.locals = { user_id };
-
+          // 後続のミドルウェアで使用
+          res.locals = { user };
           next();
-
         } else {
-          next(new CommonResponse(401, ['session out']));
-
+          next(new CommonResponse(401, ['Invalid cookie']));
         }
-
       }
-
-    })
-
+    });
   }
-
 };

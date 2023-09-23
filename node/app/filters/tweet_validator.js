@@ -11,7 +11,7 @@ const ValidationError = require('../formats/ValidationError');
  */
  module.exports.create = (req, res, callback) => {
   const { message } = req.body;
-  const { user_id } = res.locals;
+  const user_id = res.locals.user.id;
 
   try {
     /** messageの検証 */
@@ -66,7 +66,7 @@ const ValidationError = require('../formats/ValidationError');
  */
  module.exports.delete = (req, res, callback) => {
   const tweet_id = req.params.id;
-  const { user_id } = res.locals;
+  const user_id = res.locals.user.id;
 
   try {
     /** path parameterの検証 */

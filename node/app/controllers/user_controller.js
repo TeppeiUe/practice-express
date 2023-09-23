@@ -104,11 +104,11 @@ module.exports.show = async (req, res, next) => {
 module.exports.update = async (req, res, next) => {
   const callback = {
     success: async obj => {
+      const { id } = res.locals.user;
+
       await models.user.update(
         obj, {
-        where: {
-          id: res.locals.user_id
-        },
+        where: { id },
       })
       .catch(err => {
         log.app.error(err.stack);

@@ -12,7 +12,7 @@ const ValidationError = require('../formats/ValidationError');
  */
  module.exports.create = async (req, res, callback) => {
   const follow_id = req.params.id; // フォローする相手
-  const { user_id } = res.locals; // 自分
+  const user_id = res.locals.user.id; // 自分
 
   try {
     /** path parameterの検証 */
@@ -73,7 +73,7 @@ const ValidationError = require('../formats/ValidationError');
  */
  module.exports.delete = async (req, res, callback) => {
   const follow_id = req.params.id; // フォロー削除する相手
-  const { user_id } = res.locals; // 自分
+  const user_id = res.locals.user.id; // 自分
 
   try {
     /** path parameterの検証 */

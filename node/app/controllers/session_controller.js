@@ -61,19 +61,11 @@ module.exports.create = async (req, res, next) => {
  * @param {express.NextFunction} next
  */
 module.exports.search = async (req, res, next) => {
-  const user = await models.user.findByPk(res.locals.user_id)
-  .catch(err => {
-    log.app.error(err.stack);
-    next(new CommonResponse);
-  });
+  const { user } = res.locals;
 
-  if (user) {
-    res.json({
-      user: new UserBaseMode(user),
-    });
-  } else {
-    next(new CommonResponse(401, ['user is not found']));
-  }
+  res.json({
+    user: new UserBaseMode(user),
+  });
 };
 
 

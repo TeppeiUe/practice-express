@@ -86,7 +86,7 @@ module.exports.show = (req, res, callback) => {
  */
 module.exports.update = async (req, res, callback) => {
   const { user_name, profile, image } = req.body;
-  const { user_id } = res.locals;
+  const user_id = res.locals.user.id;
 
   try {
     /** user_nameの検証 */
