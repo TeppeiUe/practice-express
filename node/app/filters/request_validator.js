@@ -10,7 +10,7 @@ const CommonResponse = require('../formats/CommonResponse');
  * @param {express.NextFunction} next
  * @returns {ServerResponse}
  */
-module.exports.cookie_check = async (req, res, next) => {
+module.exports.cookieCheck = async (req, res, next) => {
   const { path, method, cookies } = req;
   const { session_id } = cookies;
 

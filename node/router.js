@@ -12,12 +12,12 @@ router.post('/login',
 );
 // ログアウトAPI
 router.delete('/logout',
-  request.cookie_check,
+  request.cookieCheck,
   controllers.session.delete
 );
 // セッション確認API
 router.post('/session',
-  request.cookie_check,
+  request.cookieCheck,
   controllers.session.search
 );
 
@@ -34,7 +34,7 @@ router.get('/user/:id',
 );
 // ユーザ更新API
 router.put('/user',
-  request.cookie_check,
+  request.cookieCheck,
   controllers.user.update
 );
 // ユーザ一覧取得API
@@ -55,12 +55,12 @@ router.get('/user/:id/followers',
 );
 // フォロー登録
 router.post('/user/:id/following',
-  request.cookie_check,
+  request.cookieCheck,
   controllers.relation.create
 );
 // フォロー削除
 router.delete('/user/:id/following',
-  request.cookie_check,
+  request.cookieCheck,
   controllers.relation.delete
 );
 
@@ -69,7 +69,7 @@ router.delete('/user/:id/following',
  */
 // ツイートAPI
 router.post('/tweet',
-  request.cookie_check,
+  request.cookieCheck,
   controllers.tweet.create
 );
 // ツイート詳細取得API
@@ -78,7 +78,7 @@ router.get('/tweet/:id',
 );
 // ツイート削除API
 router.delete('/tweet/:id',
-  request.cookie_check,
+  request.cookieCheck,
   controllers.tweet.delete
 );
 // ツイート一覧API
@@ -87,7 +87,7 @@ router.get('/tweets',
 );
 // ツイート一覧（ログインユーザ）
 router.get('/tweets/user',
-  request.cookie_check,
+  request.cookieCheck,
   controllers.tweet.home
 );
 
@@ -96,12 +96,12 @@ router.get('/tweets/user',
  */
 // お気に入り登録API
 router.post('/tweet/:id/favorite',
-  request.cookie_check,
+  request.cookieCheck,
   controllers.favorite.create
 );
 // お気に入り削除API
 router.delete('/tweet/:id/favorite',
-  request.cookie_check,
+  request.cookieCheck,
   controllers.favorite.delete
 );
 // お気に入り一覧取得API
