@@ -11,22 +11,11 @@ const CommonResponse = require('../formats/CommonResponse');
  * @returns {ServerResponse}
  */
 module.exports.cookie_check = async (req, res, next) => {
-  const { path, method } = req;
+  const { path, method, cookies } = req;
 
   log.access.info(`request url=[${path}] method=[${method}]`);
 
-  if (method.toUpperCase() === 'GET' ||
-      method.toUpperCase() === 'OPTIONS' ||
-      path === '/login' ||
-      path === '/logout' ||
-      (path === '/user' && method.toUpperCase() === 'POST')
-  ) {
-    next();
-    return null
-
-  }
-
-  const { session_id } = req.cookies;
+  const { session_id } = cookies;
 
   if (session_id === undefined) {
     log.app.info('cookie is not found');

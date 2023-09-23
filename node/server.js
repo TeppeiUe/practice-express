@@ -6,7 +6,6 @@ const app = express();
 const { WEB } = require('config');
 const log = require('./app/logs');
 const cookieParser = require('cookie-parser');
-const { request } = require('./app/filters');
 const path = require('path');
 const cors = require('cors');
 const CommonResponse = require('./app/formats/CommonResponse');
@@ -19,13 +18,13 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 /**
  * Get corsOptions
- * @param {express.Request} req 
- * @param {any} callback 
+ * @param {express.Request} req
+ * @param {any} callback
  */
 const corsOptionsDelegate = (req, callback) => {
   const corsOptions = (() => {
     const { ALLOW_ORIGINS, ALLOW_METHODS, ALLOW_HEADERS } = WEB.CORS;
-    
+
     if (ALLOW_ORIGINS.indexOf(req.headers.origin) !== -1) {
       return {
         // Access-Control-Allow-Origin
@@ -41,12 +40,11 @@ const corsOptionsDelegate = (req, callback) => {
       return { origin: false }
     }
   })();
-  
+
   callback(null, corsOptions);
 };
 app.use(cors(corsOptionsDelegate));
 
-app.use(request.cookie_check);
 require('./router')(app);
 
 /**
@@ -84,6 +82,6 @@ const server = (() => {
   }
 })();
 
-server.listen(WEB.PORT, () => 
+server.listen(WEB.PORT, () =>
   log.app.info(`Running at TLS: ${WEB.TLS}, PORT: ${WEB.PORT}`)
 );

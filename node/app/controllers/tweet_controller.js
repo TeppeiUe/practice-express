@@ -115,6 +115,58 @@ module.exports.index = async (req, res, next) => {
   });
 };
 
+/**
+ * API: /tweets/user, ツイート一覧(ログインユーザ)
+ * @param {express.Request} req
+ * @param {express.Response} res
+ * @param {express.NextFunction} next
+ */
+module.exports.home = async (req, res, next) => {
+  // ログインユーザのフォロワーユーザを取得
+  const users = await models.user.findByPk(req.current_user.id, {
+    include: [
+      {
+        model: models.user,
+        as: 'following',
+      }
+    ],
+  })
+  .catch(err => {
+    log.app.error(err.stack);
+    next(new CommonResponse);
+  });
+
+  // IN句で指定するuser_idを抽出
+  const user_id = users.following.reduce((p, c) =>
+    [...p, c.id],
+    [req.current_user.id]
+  );
+
+  const tweets = await models.tweet.findAll({
+    include: [
+      {
+        model: models.user,
+        attributes,
+      },
+      {
+        model: models.user,
+        as: 'passive_favorite',
+        attributes,
+      }
+    ],
+    where: { user_id },
+    order,
+  })
+  .catch(err => {
+    log.app.error(err.stack);
+    next(new CommonResponse);
+  });
+
+  res.json({
+    tweets: tweets.map(tweet => new TweetResponse(tweet)),
+  });
+};
+
 
 /**
  * API: /tweet/:id (DELETE), ツイート削除
