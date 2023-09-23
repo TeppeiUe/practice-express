@@ -17,39 +17,39 @@ const { WEB } = require('config');
     if (user_name === undefined) {
         err_msg.push('user_name is undefined');
     } else
-    if (check.is_empty(user_name)) {
+    if (check.isEmpty(user_name)) {
       err_msg.push('user_name is empty')
     } else
-    if (!check.is_string(user_name)) {
+    if (!check.isString(user_name)) {
       err_msg.push('user_name is not string');
     } else
-    if (!check.is_string_within_range(user_name, 1, 16)) {
+    if (!check.isStringWithinRange(user_name, 1, 16)) {
       err_msg.push('message is out of range');
     } else
-    if (await check.user_name_exist(user_name)) {
+    if (await check.userNameExist(user_name)) {
       err_msg.push('user_name is already exist');
     }
 
     if (email === undefined) {
       err_msg.push('email is undefined');
     } else
-    if (check.is_empty(email)) {
+    if (check.isEmpty(email)) {
       err_msg.push('email is empty');
     } else
-    if (!check.is_mail_address(email)) {
+    if (!check.isMailAddress(email)) {
       err_msg.push('email is not email format');
     } else
-    if (await check.email_exist(email)) {
+    if (await check.emailExist(email)) {
       err_msg.push('email is already exist');
     }
 
     if (password === undefined) {
       err_msg.push('password is undefined');
     } else
-    if (check.is_empty(password)) {
+    if (check.isEmpty(password)) {
       err_msg.push('password is empty');
     } else
-    if (!check.is_string(password)) {
+    if (!check.isString(password)) {
       err_msg.push('password is not string');
     }
 
@@ -85,10 +85,10 @@ module.exports.show = (req, callback) => {
       err_msg.push('user_id is undefined');
 
     } else
-    if (check.is_empty(id)) {
+    if (check.isEmpty(id)) {
       err_msg.push('user_id is empty');
     } else
-    if (!check.is_positive_integer(id)) {
+    if (!check.isPositiveInteger(id)) {
       err_msg.push('user_id is not positive integer');
     }
 
@@ -121,33 +121,33 @@ module.exports.update = async (req, callback) => {
     if (user_name === undefined) {
       err_msg.push('usr_name is undefined');
     } else
-    if (check.is_empty(user_name)) {
+    if (check.isEmpty(user_name)) {
       err_msg.push('user_name is empty')
     } else
-    if (!check.is_string(user_name)) {
+    if (!check.isString(user_name)) {
       err_msg.push('user_name is not string')
     } else
-    if (!check.is_string_within_range(user_name, 1, 16)) {
+    if (!check.isStringWithinRange(user_name, 1, 16)) {
       err_msg.push('user_name is out of range');
     } else
-    if ((await check.user_name_exist(user_name) || user_id) !== user_id) {
+    if ((await check.userNameExist(user_name) || user_id) !== user_id) {
       err_msg.push('user_name is already exist');
     }
 
     if (profile === undefined) {
       err_msg.push('email is undefined');
     } else
-    if (!check.is_string(profile)) {
+    if (!check.isString(profile)) {
       err_msg.push('profile is not string');
     } else
-    if (!check.is_string_within_range(profile, 1, 140)) {
+    if (!check.isStringWithinRange(profile, 1, 140)) {
       err_msg.push('profile is out of range');
     }
 
     if (image === undefined) {
       err_msg.push('image is undefined');
     } else
-    if (!check.is_string(image)) {
+    if (!check.isString(image)) {
       err_msg.push('image is not string');
     }
 

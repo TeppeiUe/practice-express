@@ -16,20 +16,20 @@ module.exports.create = (req, callback) => {
     if (email === undefined) {
       err_msg.push('email is undefined');
     } else
-    if (check.is_empty(email)) {
+    if (check.isEmpty(email)) {
       err_msg.push('email is empty');
     } else
-    if (!check.is_mail_address(email)) {
+    if (!check.isMailAddress(email)) {
       err_msg.push('email is not email format');
     }
 
     if (password === undefined) {
       err_msg.push('password is undefined');
     } else
-    if (check.is_empty(password)) {
+    if (check.isEmpty(password)) {
       err_msg.push('password is empty');
     } else
-    if (!check.is_string(password)) {
+    if (!check.isString(password)) {
       err_msg.pash('password is not string');
     }
 

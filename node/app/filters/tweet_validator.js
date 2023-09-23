@@ -16,13 +16,13 @@ const { check } = require('../services');
     if (message === undefined) {
         err_msg.push('message is undefined');
     } else
-    if (check.is_empty(message)) {
+    if (check.isEmpty(message)) {
       err_msg.push('message is empty');
     } else
-    if (!check.is_string(message)) {
+    if (!check.isString(message)) {
       err_msg.push('message is not string');
     } else
-    if (!check.is_string_within_range(message, 1, 140)) {
+    if (!check.isStringWithinRange(message, 1, 140)) {
       err_msg.push('message is out of range');
     }
 
@@ -57,10 +57,10 @@ const { check } = require('../services');
     if (tweet_id === undefined) {
       err_msg.push('tweet_id is undefined');
     } else
-    if (check.is_empty(tweet_id)) {
+    if (check.isEmpty(tweet_id)) {
       err_msg.push('tweet_id is empty');
     } else
-    if (!check.is_positive_integer(tweet_id)) {
+    if (!check.isPositiveInteger(tweet_id)) {
       err_msg.push('tweet_id is not positive integer');
     }
 
@@ -92,10 +92,10 @@ const { check } = require('../services');
     if (tweet_id === undefined) {
       err_msAg.push('tweet_id is undefined');
     } else
-    if (check.is_empty(tweet_id)) {
+    if (check.isEmpty(tweet_id)) {
       err_msg.push('tweet_id is empty');
     } else
-    if (!check.is_positive_integer(tweet_id)) {
+    if (!check.isPositiveInteger(tweet_id)) {
       err_msg.push('tweet_id is not positive integer');
     }
 

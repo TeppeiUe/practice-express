@@ -16,13 +16,13 @@ const { check } = require('../services');
     if (tweet_id === undefined) {
       err_msg.push('tweet_id is undefined');
     } else
-    if (check.is_empty(tweet_id)) {
+    if (check.isEmpty(tweet_id)) {
       err_msg.push('tweet_id is empty');
     } else
-    if (!check.is_positive_integer(tweet_id)) {
+    if (!check.isPositiveInteger(tweet_id)) {
       err_msg.push('tweet_id is not positive integer');
     } else
-    if (!(await check.tweet_exist(tweet_id))) {
+    if (!(await check.tweetExist(tweet_id))) {
       err_msg.push('tweet is not found');
     }
 
@@ -57,10 +57,10 @@ const { check } = require('../services');
     if (id === undefined) {
       err_msg.push('user_id is undefined');
     } else
-    if (check.is_empty(id)) {
+    if (check.isEmpty(id)) {
       err_msg.push('user_id is empty');
     } else
-    if (!check.is_positive_integer(id)) {
+    if (!check.isPositiveInteger(id)) {
       err_msg.push('user_id is not positive integer');
     }
 
@@ -92,10 +92,10 @@ const { check } = require('../services');
     if (tweet_id === undefined) {
       err_msg.push('tweet_id is undefined');
     } else
-    if (check.is_empty(tweet_id)) {
+    if (check.isEmpty(tweet_id)) {
       err_msg.push('tweet_id is empty');
     } else
-    if (!check.is_positive_integer(tweet_id)) {
+    if (!check.isPositiveInteger(tweet_id)) {
       err_msg.push('tweet_id is not positive integer');
     }
 

@@ -6,7 +6,7 @@ const { user, tweet } = require('../models');
  * @param {any} val
  * @returns {boolean}
  */
- module.exports.is_empty = val => {
+ module.exports.isEmpty = val => {
   if (val === null) return true
   if (Array.isArray(val)) return Boolean(val.length)
   return typeof val !== 'string' ? false : !Boolean(val.length);
@@ -18,7 +18,7 @@ const { user, tweet } = require('../models');
  * @param {any} val
  * @returns {boolean}
  */
-module.exports.is_positive_integer = val => {
+module.exports.isPositiveInteger = val => {
   const num = Number(val);
   if (num === undefined) return false
   return Number.isInteger(num) ? 1 <= val : false
@@ -30,7 +30,7 @@ module.exports.is_positive_integer = val => {
  * @param {any} val
  * @returns {boolean}
  */
-module.exports.is_string = val => typeof val === 'string';
+module.exports.isString = val => typeof val === 'string';
 
 
 /**
@@ -40,8 +40,8 @@ module.exports.is_string = val => typeof val === 'string';
  * @param {number} max
  * @returns {boolean}
  */
-module.exports.is_string_within_range = (val, min, max) => {
-  const len = this.is_empty(val) && this.is_string(val) ? 0 : val.length;
+module.exports.isStringWithinRange = (val, min, max) => {
+  const len = this.isEmpty(val) && this.isString(val) ? 0 : val.length;
   return min <= len && len <= max
 };
 
@@ -51,7 +51,7 @@ module.exports.is_string_within_range = (val, min, max) => {
  * @param {string} val
  * @returns {boolean}
  */
-module.exports.is_mail_address = val => val === undefined ? false : val.match(/.+@.+\..+/);
+module.exports.isMailAddress = val => val === undefined ? false : val.match(/.+@.+\..+/);
 
 
 /**
@@ -59,7 +59,7 @@ module.exports.is_mail_address = val => val === undefined ? false : val.match(/.
  * @param {number|string} id
  * @returns {boolean}
  */
-module.exports.user_exist = async id => !!(await user.findByPk(id));
+module.exports.userExist = async id => !!(await user.findByPk(id));
 
 
 /**
@@ -67,7 +67,7 @@ module.exports.user_exist = async id => !!(await user.findByPk(id));
  * @param {string} user_name
  * @returns {number|null} ユーザーIDかnullを返却
  */
-module.exports.user_name_exist = async user_name => {
+module.exports.userNameExist = async user_name => {
   const res = await user.findOne({
     where: { user_name }
   });
@@ -80,7 +80,7 @@ module.exports.user_name_exist = async user_name => {
  * @param {string} email
  * @returns {number|null} ユーザーIDかnullを返却
  */
-module.exports.email_exist = async email => {
+module.exports.emailExist = async email => {
   const res = await user.findOne({
     where: { email }
   });
@@ -93,4 +93,4 @@ module.exports.email_exist = async email => {
  * @param {string|number} id
  * @returns {boolean}
  */
-module.exports.tweet_exist = async id => !!(await tweet.findByPk(id));
+module.exports.tweetExist = async id => !!(await tweet.findByPk(id));

@@ -17,16 +17,16 @@ const { check } = require('../services');
     if (follow_id === undefined) {
       err_msg.push('follow_id is undefined');
     } else
-    if (check.is_empty(follow_id)) {
+    if (check.isEmpty(follow_id)) {
       err_msg.push('follow_id is empty');
     } else
-    if (!check.is_positive_integer(follow_id)) {
+    if (!check.isPositiveInteger(follow_id)) {
       err_msg.push('follow_id is not positive integer');
     } else
     if (Number(follow_id) === user_id) {
       err_msg.push('prohibit same user follow');
     } else
-    if (!(await check.user_exist(follow_id))) {
+    if (!(await check.userExist(follow_id))) {
       err_msg.push('user is not found');
     }
 
@@ -58,10 +58,10 @@ const { check } = require('../services');
     if (id === undefined) {
       err_msg.push('user_id is undefined');
     } else
-    if (check.is_empty(id)) {
+    if (check.isEmpty(id)) {
       err_msg.push('user_id is empty');
     } else
-    if (!check.is_positive_integer(id)) {
+    if (!check.isPositiveInteger(id)) {
       err_msg.push('user_id is not positive integer');
     }
 
@@ -93,10 +93,10 @@ const { check } = require('../services');
     if (follow_id === undefined) {
       err_msg.push('follow_id is undefined');
     } else
-    if (check.is_empty(follow_id)) {
+    if (check.isEmpty(follow_id)) {
       err_msg.push('follow_id is empty');
     } else
-    if (!check.is_positive_integer(follow_id)) {
+    if (!check.isPositiveInteger(follow_id)) {
       err_msg.push('follow_id is not positive integer');
     }
 
