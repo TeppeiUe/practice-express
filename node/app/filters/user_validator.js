@@ -83,13 +83,7 @@ module.exports.show = (req, res, callback) => {
   let err_msg = [];
 
   try {
-    if (id === undefined) {
-      err_msg.push('user_id is undefined');
-
-    } else
-    if (check.isEmpty(id)) {
-      err_msg.push('user_id is empty');
-    } else
+    // pathに:idが存在しない場合404返却のため、存在性チェックは不要
     if (!check.isPositiveInteger(id)) {
       err_msg.push('user_id is not positive integer');
     }

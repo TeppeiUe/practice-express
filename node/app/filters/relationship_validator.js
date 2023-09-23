@@ -15,12 +15,7 @@ const { check } = require('../services');
   let err_msg = [];
 
   try {
-    if (follow_id === undefined) {
-      err_msg.push('follow_id is undefined');
-    } else
-    if (check.isEmpty(follow_id)) {
-      err_msg.push('follow_id is empty');
-    } else
+    // pathに:idが存在しない場合404返却のため、存在性チェックは不要
     if (!check.isPositiveInteger(follow_id)) {
       err_msg.push('follow_id is not positive integer');
     } else
@@ -57,12 +52,7 @@ const { check } = require('../services');
   let err_msg = [];
 
   try {
-    if (id === undefined) {
-      err_msg.push('user_id is undefined');
-    } else
-    if (check.isEmpty(id)) {
-      err_msg.push('user_id is empty');
-    } else
+    // pathに:idが存在しない場合404返却のため、存在性チェックは不要
     if (!check.isPositiveInteger(id)) {
       err_msg.push('user_id is not positive integer');
     }
@@ -93,12 +83,7 @@ const { check } = require('../services');
   let err_msg = [];
 
   try {
-    if (follow_id === undefined) {
-      err_msg.push('follow_id is undefined');
-    } else
-    if (check.isEmpty(follow_id)) {
-      err_msg.push('follow_id is empty');
-    } else
+    // pathに:idが存在しない場合404返却のため、存在性チェックは不要
     if (!check.isPositiveInteger(follow_id)) {
       err_msg.push('follow_id is not positive integer');
     }

@@ -56,12 +56,7 @@ const { check } = require('../services');
   let err_msg = [];
 
   try {
-    if (tweet_id === undefined) {
-      err_msg.push('tweet_id is undefined');
-    } else
-    if (check.isEmpty(tweet_id)) {
-      err_msg.push('tweet_id is empty');
-    } else
+    // pathに:idが存在しない場合404返却のため、存在性チェックは不要
     if (!check.isPositiveInteger(tweet_id)) {
       err_msg.push('tweet_id is not positive integer');
     }
@@ -92,12 +87,7 @@ const { check } = require('../services');
   let err_msg = [];
 
   try {
-    if (tweet_id === undefined) {
-      err_msAg.push('tweet_id is undefined');
-    } else
-    if (check.isEmpty(tweet_id)) {
-      err_msg.push('tweet_id is empty');
-    } else
+    // pathに:idが存在しない場合404返却のため、存在性チェックは不要
     if (!check.isPositiveInteger(tweet_id)) {
       err_msg.push('tweet_id is not positive integer');
     }
