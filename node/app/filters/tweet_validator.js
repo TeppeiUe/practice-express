@@ -25,7 +25,7 @@ const ValidationError = require('../formats/ValidationError');
 
   } catch (err) {
     if (err instanceof ValidationError) {
-      callback.failure([err.message]);
+      callback.failure(err.message);
     } else {
       callback.error(err);
     }
@@ -50,7 +50,7 @@ const ValidationError = require('../formats/ValidationError');
 
   } catch (err) {
     if (err instanceof ValidationError) {
-      callback.failure([err.message]);
+      callback.failure(err.message);
     } else {
       callback.error(err);
     }
@@ -79,7 +79,7 @@ const ValidationError = require('../formats/ValidationError');
 
   } catch (err) {
     if (err instanceof ValidationError) {
-      callback.failure([err.message]);
+      callback.failure(err.message);
     } else {
       callback.error(err);
     }
@@ -90,7 +90,7 @@ const ValidationError = require('../formats/ValidationError');
 /**
  * validationコールバック
  * @callback callback
- * @param {function(any): void} success
- * @param {function(string[]): void} failure
+ * @param {function(any): Promise<void>} success
+ * @param {function(string): void} failure
  * @param {function(any): void} error
  */

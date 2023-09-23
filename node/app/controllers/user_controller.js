@@ -43,7 +43,7 @@ module.exports.create = async (req, res, next) => {
         next(new CommonResponse(400, ['signup failure']));
       }
     },
-    failure: msg_list => next(new CommonResponse(400, msg_list)),
+    failure: msg => next(new CommonResponse(400, msg)),
     error: err => {
       log.app.error(err.stack);
       next(new CommonResponse);
@@ -84,7 +84,7 @@ module.exports.show = async (req, res, next) => {
         user: new UserResponse(user),
       });
     },
-    failure: msg_list => next(new CommonResponse(400, msg_list)),
+    failure: msg => next(new CommonResponse(400, msg)),
     error: err => {
       log.app.error(err.stack);
       next(new CommonResponse);
@@ -117,7 +117,7 @@ module.exports.update = async (req, res, next) => {
 
       res.status(204).end();
     },
-    failure: msg_list => next(new CommonResponse(400, msg_list)),
+    failure: msg => next(new CommonResponse(400, msg)),
     error: err => {
       log.app.error(err.stack);
       next(new CommonResponse);

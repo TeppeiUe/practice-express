@@ -9,18 +9,18 @@ class CommonResponse {
   status;
   /**
    * message
-   * @type {string[]}
+   * @type {string}
    */
   message;
 
   /**
-   * constructor
+   * @constructor
    * @param {number} status statusCode
-   * @param {string[]} message message
+   * @param {string} message message
    */
   constructor(
     status = 500,
-    message = ['unexpected error']
+    message = 'unexpected error'
   ) {
     this.status = status;
     this.message = message;

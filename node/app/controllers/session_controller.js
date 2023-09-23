@@ -49,7 +49,7 @@ module.exports.create = async (req, res, next) => {
         next(new CommonResponse(401, ['user is not found']));
       }
     },
-    failure: msg_list => next(new CommonResponse(401, msg_list)),
+    failure: msg => next(new CommonResponse(401, msg)),
     error: err => {
       log.app.error(err.stack);
       next(new CommonResponse);
