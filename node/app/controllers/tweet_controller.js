@@ -123,7 +123,7 @@ module.exports.index = async (req, res, next) => {
  */
 module.exports.home = async (req, res, next) => {
   // ログインユーザのフォロワーユーザを取得
-  const users = await models.user.findByPk(req.current_user.id, {
+  const users = await models.user.findByPk(res.locals.user_id, {
     include: [
       {
         model: models.user,
@@ -139,7 +139,7 @@ module.exports.home = async (req, res, next) => {
   // IN句で指定するuser_idを抽出
   const user_id = users.following.reduce((p, c) =>
     [...p, c.id],
-    [req.current_user.id]
+    [res.locals.user_id]
   );
 
   const tweets = await models.tweet.findAll({

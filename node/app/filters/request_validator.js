@@ -34,7 +34,7 @@ module.exports.cookie_check = async (req, res, next) => {
           session.setCookie(res, session_id, expires);
 
           // 後続のミドルウェアで使用予定
-          req.current_user = { id: user_id };
+          res.locals = { user_id };
 
           next();
 

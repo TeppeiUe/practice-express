@@ -114,7 +114,7 @@ module.exports.show = (req, callback) => {
 module.exports.update = async (req, callback) => {
 
   const { user_name, profile, image } = req.body;
-  const { id } = req.current_user;
+  const { user_id } = res.locals;
   let err_msg = [];
 
   try {
@@ -130,7 +130,7 @@ module.exports.update = async (req, callback) => {
     if (!check.is_string_within_range(user_name, 1, 16)) {
       err_msg.push('user_name is out of range');
     } else
-    if ((await check.user_name_exist(user_name) || id) !== id) {
+    if ((await check.user_name_exist(user_name) || user_id) !== user_id) {
       err_msg.push('user_name is already exist');
     }
 

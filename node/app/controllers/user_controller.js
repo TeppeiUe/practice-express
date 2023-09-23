@@ -107,7 +107,7 @@ module.exports.update = async (req, res, next) => {
       await models.user.update(
         obj, {
         where: {
-          id: req.current_user.id
+          id: res.locals.user_id
         },
       })
       .catch(err => {

@@ -10,7 +10,7 @@ const { check } = require('../services');
  module.exports.create = async (req, callback) => {
 
   const follow_id = req.params.id; // フォローする相手
-  const user_id = req.current_user.id; // 自分
+  const { user_id } = res.locals; // 自分
   let err_msg = [];
 
   try {
@@ -105,7 +105,7 @@ const { check } = require('../services');
     } else {
       callback.success({
         ...{ follow_id },
-        user_id: req.current_user.id
+        user_id: res.locals.user_id
       });
     }
 

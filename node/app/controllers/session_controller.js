@@ -67,7 +67,7 @@ module.exports.create = async (req, res, next) => {
  * @param {express.NextFunction} next
  */
 module.exports.search = async (req, res, next) => {
-  const user = await models.user.findByPk(req.current_user.id)
+  const user = await models.user.findByPk(res.locals.user_id)
   .catch(err => {
     log.app.error(err.stack);
     next(new CommonResponse);

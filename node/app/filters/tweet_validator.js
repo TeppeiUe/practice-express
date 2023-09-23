@@ -30,7 +30,7 @@ const { check } = require('../services');
       callback.failure(err_msg);
     } else {
       callback.success({
-        user_id: req.current_user.id,
+        user_id: res.locals.user_id,
         ...{ message }
       });
     }
@@ -103,7 +103,7 @@ const { check } = require('../services');
       callback.failure(err_msg);
     } else {
       callback.success({
-        user_id: req.current_user.id,
+        user_id: res.locals.user_id,
         ...{ tweet_id }
       });
     }
