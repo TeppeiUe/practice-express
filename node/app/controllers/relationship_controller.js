@@ -29,7 +29,7 @@ module.exports.create = async (req, res, next) => {
       if (created) {
         res.status(204).end();
       } else {
-        next(new CommonResponse(400, ['already follow this user']));
+        next(new CommonResponse(400, 'already follow this user'));
       }
     },
     failure: msg => next(new CommonResponse(400, msg)),
@@ -149,7 +149,7 @@ module.exports.delete = async (req, res, next) => {
       if (following) {
         res.status(204).end();
       } else {
-        next(new CommonResponse(400, ['cannot delete']));
+        next(new CommonResponse(400, 'cannot delete'));
       }
     },
     failure: msg => next(new CommonResponse(400, msg)),

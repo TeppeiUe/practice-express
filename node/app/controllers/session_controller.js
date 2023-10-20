@@ -40,7 +40,7 @@ module.exports.create = async (req, res, next) => {
           }
         })
       } else {
-        next(new CommonResponse(401, ['user is not found']));
+        next(new CommonResponse(401, 'user is not found'));
       }
     },
     failure: msg => next(new CommonResponse(401, msg)),

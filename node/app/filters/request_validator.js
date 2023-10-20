@@ -19,7 +19,7 @@ module.exports.cookieCheck = async (req, res, next) => {
   log.access.info(`request url=[${path}] method=[${method}]`);
 
   if (session_id === undefined) {
-    next(new CommonResponse(401, ['cookie is required']));
+    next(new CommonResponse(401, 'cookie is required'));
 
   } else {
     await session.search(session_id, (ret, err) => {
@@ -34,7 +34,7 @@ module.exports.cookieCheck = async (req, res, next) => {
           res.locals = { user };
           next();
         } else {
-          next(new CommonResponse(401, ['Invalid cookie']));
+          next(new CommonResponse(401, 'Invalid cookie'));
         }
       }
     });

@@ -112,7 +112,7 @@ module.exports.delete = async (req, res, next) => {
       if (favorite) {
         res.status(204).end();
       } else {
-        next(new CommonResponse(400, ['favorite tweet is not found']));
+        next(new CommonResponse(400, 'favorite tweet is not found'));
       }
     },
     failure: msg => next(new CommonResponse(400, msg)),

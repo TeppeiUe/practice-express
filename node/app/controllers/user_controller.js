@@ -40,7 +40,7 @@ module.exports.create = async (req, res, next) => {
           }
         })
       } else {
-        next(new CommonResponse(400, ['signup failure']));
+        next(new CommonResponse(400, 'signup failure'));
       }
     },
     failure: msg => next(new CommonResponse(400, msg)),
