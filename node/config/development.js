@@ -57,6 +57,8 @@ module.exports = {
       order: [
         ['created_at', 'desc'],
       ],
+      LIMIT: 20,
+      OFFSET: 0,
     },
     USER_TABLE: {
       // 属性を指定しない場合全カラムが返却につき、安全のため指定すること

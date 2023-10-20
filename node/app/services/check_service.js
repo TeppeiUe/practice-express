@@ -39,7 +39,6 @@ module.exports.userName = async (user_name, user_id = null) => {
 /**
  * path parameter check
  * @param {string} val
- * @returns {boolean}
  */
 module.exports.pathParameter = val => {
   // pathに:idが存在しない場合404返却のため、存在性チェックは不要
@@ -47,6 +46,18 @@ module.exports.pathParameter = val => {
     throw new ValidationError('Invalid parameter');
   }
 };
+
+/**
+ * query option check
+ * @param {string} val
+ * @param {string} field
+ */
+module.exports.queryOption = (val, field) => {
+  // query parameterより取得のためプロパティの存在で空白
+  if (typeof val === 'string' && !val.match(/^\d+$/)) {
+    throw new ValidationError(`Invalid ${field}`);
+  }
+}
 
 /**
  * word count check

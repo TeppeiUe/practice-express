@@ -1,7 +1,7 @@
 const express = require('express');
 const models = require('../models');
 const log = require('../logs');
-const { user_validator } = require('../filters');
+const { user_validator, request } = require('../filters');
 const { session } = require('../services');
 const CommonResponse = require('../formats/CommonResponse');
 const UserBaseMode = require('../formats/UserBaseModel');
@@ -135,16 +135,28 @@ module.exports.update = async (req, res, next) => {
  * @param {express.NextFunction} next
  */
 module.exports.index = async (req, res, next) => {
-  const users = await models.user.findAll({
-    attributes,
-    order,
-  })
-  .catch(err => {
-    log.app.error(err.stack);
-    next(new CommonResponse);
-  });
+  const callback = {
+    success: async obj => {
+      const users = await models.user.findAll({
+        attributes,
+        ...obj,
+        order,
+      })
+      .catch(err => {
+        log.app.error(err.stack);
+        next(new CommonResponse);
+      });
 
-  res.json({
-    users: users.map(user => new UserBaseMode(user)),
-  });
+      res.json({
+        users: users.map(user => new UserBaseMode(user)),
+      });
+    },
+    failure: msg => next(new CommonResponse(400, msg)),
+    error: err => {
+      log.app.error(err.stack);
+      next(new CommonResponse);
+    },
+  };
+
+  request.index(req, res, callback);
 };

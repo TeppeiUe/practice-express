@@ -46,14 +46,11 @@ module.exports.create = async (req, res, next) => {
  * @param {express.NextFunction} next
  */
 module.exports.index = async (req, res, next) => {
-
   const callback = {
-    success: async ({ id }) => {
-      const favorites = await models.user.findByPk(id, {
+    success: async ({ id, ...obj }) => {
+      const favorites = await models.favorite.findOne({
         include: {
           model: models.tweet,
-          as: 'active_favorite',
-          order,
           include: [
             {
               model: models.user,
@@ -66,15 +63,21 @@ module.exports.index = async (req, res, next) => {
             },
           ],
         },
+        where: {
+          user_id: id
+        },
+        order,
+        ...obj,
       })
       .catch(err => {
         log.app.error(err.stack);
         next(new CommonResponse);
       });
 
-      const { active_favorite } = favorites;
       res.json({
-        tweets: active_favorite.map(favorite => new TweetResponse(favorite)),
+        tweets: favorites
+          ? favorites.tweets.map(tweet => new TweetResponse(tweet))
+          : [],
       });
 
     },
@@ -96,7 +99,6 @@ module.exports.index = async (req, res, next) => {
  * @param {express.NextFunction} next
  */
 module.exports.delete = async (req, res, next) => {
-
   const callback = {
     success: async obj => {
       const favorite = await models.favorite.destroy({

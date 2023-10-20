@@ -2,6 +2,8 @@ const express = require('express');
 const { check } = require('../services');
 const { user } = require('../models');
 const ValidationError = require('../formats/ValidationError');
+const { DB } = require('config');
+const { LIMIT, OFFSET } = DB.COMMON_TABLE;
 
 
 /**
@@ -48,12 +50,29 @@ const ValidationError = require('../formats/ValidationError');
  */
  module.exports.index = (req, res, callback) => {
   const { id } = req.params;
+  let { limit, offset } = req.query;
 
   try {
     /** path parameterの検証 */
     check.pathParameter(id);
 
-    callback.success({ id });
+    /** limitの検証 */
+    check.queryOption(limit, 'limit');
+    if (limit === undefined) {
+      limit = LIMIT;
+    }
+
+    /** offsetの検証 */
+    check.queryOption(offset, 'offset');
+    if (offset === undefined) {
+      offset = OFFSET;
+    }
+
+    callback.success({
+      id,
+      limit,
+      offset,
+    });
 
   } catch (err) {
     if (err instanceof ValidationError) {

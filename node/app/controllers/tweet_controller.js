@@ -1,7 +1,7 @@
 const express = require('express');
 const models = require('../models');
 const log = require('../logs');
-const { tweet_validator } = require('../filters');
+const { tweet_validator, request } = require('../filters');
 const CommonResponse = require('../formats/CommonResponse');
 const TweetBaseModel = require('../formats/TweetBaseModel');
 const TweetResponse = require('../formats/TweetResponse');
@@ -90,28 +90,40 @@ module.exports.show = async (req, res, next) => {
  * @param {express.NextFunction} next
  */
 module.exports.index = async (req, res, next) => {
-  const tweets = await models.tweet.findAll({
-    include: [
-      {
-        model: models.user,
-        attributes,
-      },
-      {
-        model: models.user,
-        as: 'passive_favorite',
-        attributes,
-      }
-    ],
-    order,
-  })
-  .catch(err => {
-    log.app.error(err.stack);
-    next(new CommonResponse);
-  });
+  const callback = {
+    success: async obj => {
+      const tweets = await models.tweet.findAll({
+        include: [
+          {
+            model: models.user,
+            attributes,
+          },
+          {
+            model: models.user,
+            as: 'passive_favorite',
+            attributes,
+          }
+        ],
+        ...obj,
+        order,
+      })
+      .catch(err => {
+        log.app.error(err.stack);
+        next(new CommonResponse);
+      });
 
-  res.json({
-    tweets: tweets.map(tweet => new TweetResponse(tweet)),
-  });
+      res.json({
+        tweets: tweets.map(tweet => new TweetResponse(tweet)),
+      });
+    },
+    failure: msg => next(new CommonResponse(400, msg)),
+    error: err => {
+      log.app.error(err.stack);
+      next(new CommonResponse);
+    },
+  };
+
+  request.index(req, res, callback);
 };
 
 /**
@@ -121,51 +133,63 @@ module.exports.index = async (req, res, next) => {
  * @param {express.NextFunction} next
  */
 module.exports.home = async (req, res, next) => {
-  const { id } = res.locals.user;
+  const callback = {
+    success: async obj => {
+      const { id } = res.locals.user;
 
-  // ログインユーザのフォロワーユーザを取得
-  const users = await models.user.findByPk(id, {
-    include: [
-      {
-        model: models.user,
-        as: 'following',
-      }
-    ],
-  })
-  .catch(err => {
-    log.app.error(err.stack);
-    next(new CommonResponse);
-  });
+      // ログインユーザのフォロワーユーザを取得
+      const users = await models.user.findByPk(id, {
+        include: [
+          {
+            model: models.user,
+            as: 'following',
+          }
+        ],
+      })
+      .catch(err => {
+        log.app.error(err.stack);
+        next(new CommonResponse);
+      });
 
-  // IN句で指定するuser_idを抽出
-  const user_id = users.following.reduce((p, c) =>
-    [...p, c.id],
-    [id]
-  );
+      // IN句で指定するuser_idを抽出
+      const user_id = users.following.reduce((p, c) =>
+        [...p, c.id],
+        [id]
+      );
 
-  const tweets = await models.tweet.findAll({
-    include: [
-      {
-        model: models.user,
-        attributes,
-      },
-      {
-        model: models.user,
-        as: 'passive_favorite',
-        attributes,
-      }
-    ],
-    where: { user_id },
-    order,
-  })
-  .catch(err => {
-    log.app.error(err.stack);
-    next(new CommonResponse);
-  });
+      const tweets = await models.tweet.findAll({
+        include: [
+          {
+            model: models.user,
+            attributes,
+          },
+          {
+            model: models.user,
+            as: 'passive_favorite',
+            attributes,
+          }
+        ],
+        where: { user_id },
+        ...obj,
+        order,
+      })
+      .catch(err => {
+        log.app.error(err.stack);
+        next(new CommonResponse);
+      });
 
-  res.json({
-    tweets: tweets.map(tweet => new TweetResponse(tweet)),
-  });
+      res.json({
+        tweets: tweets.map(tweet => new TweetResponse(tweet)),
+      });
+    },
+    failure: msg => next(new CommonResponse(400, msg)),
+    error: err => {
+      log.app.error(err.stack);
+      next(new CommonResponse);
+    },
+  };
+
+  request.index(req, res, callback);
 };
 
 

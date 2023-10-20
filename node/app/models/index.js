@@ -70,6 +70,10 @@ module.exports = {
     foreignKey: 'tweet_id',
     otherKey: 'user_id',
   });
+  m.favorite.hasMany(m.tweet, {
+    sourceKey: 'tweet_id',
+    foreignKey: 'id',
+  });
 
   m.user.belongsToMany(m.user, {
     through: m.relationship,

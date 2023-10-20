@@ -51,14 +51,20 @@ module.exports.create = async (req, res, next) => {
  */
 module.exports.followings = async (req, res, next) => {
   const callback = {
-    success: async ({ id }) => {
-      const users = await models.user.findByPk(id, {
+    success: async ({ id, ...obj }) => {
+      const users = await models.user.findAll({
         include: {
           model: models.user,
-          as: 'following',
-          attributes,
-          order,
+          as: 'follower',
+          attributes: [],
+          where: {
+            id,
+          }
         },
+        subQuery: false,
+        attributes,
+        order,
+        ...obj,
       })
       .catch(err => {
         log.app.error(err);
@@ -66,7 +72,7 @@ module.exports.followings = async (req, res, next) => {
       });
 
       res.json({
-        users: users.following.map(user => new UserBaseModel(user)),
+        users: users.map(user => new UserBaseModel(user)),
       });
     },
     failure: msg => next(new CommonResponse(400, msg)),
@@ -88,14 +94,20 @@ module.exports.followings = async (req, res, next) => {
  */
 module.exports.followers = async (req, res, next) => {
   const callback = {
-    success: async ({ id }) => {
-      const user = await models.user.findByPk(id, {
+    success: async ({ id, ...obj }) => {
+      const user = await models.user.findAll({
         include: {
           model: models.user,
-          as: 'follower',
-          attributes,
-          order,
+          as: 'following',
+          attributes: [],
+          where: {
+            id,
+          },
         },
+        subQuery: false,
+        attributes,
+        order,
+        ...obj,
       })
       .catch(err => {
         log.app.error(err);
@@ -103,7 +115,7 @@ module.exports.followers = async (req, res, next) => {
       });
 
       res.json({
-        users: user.follower.map(user => new UserBaseModel(user)),
+        users: user.map(user => new UserBaseModel(user)),
       });
     },
     failure: msg => next(new CommonResponse(400, msg)),

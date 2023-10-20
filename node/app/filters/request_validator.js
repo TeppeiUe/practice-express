@@ -1,14 +1,16 @@
 const express = require('express');
-const { session } = require('../services');
+const { session, check } = require('../services');
 const log = require('../logs');
 const CommonResponse = require('../formats/CommonResponse');
+const ValidationError = require('../formats/ValidationError');
+const { DB } = require('config');
+const { LIMIT, OFFSET } = DB.COMMON_TABLE;
 
 /**
  * cookieチェック
  * @param {express.Request} req
  * @param {express.Response} res
  * @param {express.NextFunction} next
- * @returns {ServerResponse}
  */
 module.exports.cookieCheck = async (req, res, next) => {
   const { path, method, cookies } = req;
@@ -38,3 +40,48 @@ module.exports.cookieCheck = async (req, res, next) => {
     });
   }
 };
+
+
+/**
+ * 一覧取得共通validatior
+ * @param {express.Response} res
+ * @param {express.Request} req
+ * @param {callback} callback
+ */
+module.exports.index = (req, res, callback) => {
+  let { limit, offset } = req.query;
+
+  try {
+    /** limitの検証 */
+    check.queryOption(limit, 'limit');
+    if (limit === undefined) {
+      limit = LIMIT;
+    }
+
+    /** offsetの検証 */
+    check.queryOption(offset, 'offset');
+    if (offset === undefined) {
+      offset = OFFSET;
+    }
+
+    callback.success({
+      limit,
+      offset,
+    });
+
+  } catch (err) {
+    if (err instanceof ValidationError) {
+      callback.failure(err.message);
+    } else {
+      callback.error(err);
+    }
+  }
+};
+
+/**
+ * validationコールバック
+ * @callback callback
+ * @param {function(any): Promise<void>} success
+ * @param {function(string): void} failure
+ * @param {function(any): void} error
+ */
