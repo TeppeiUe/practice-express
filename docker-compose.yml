@@ -1,7 +1,7 @@
 version: "3"
 services:
   web-service:
-    image: node:18.12.1
+    image: node:18.18.2-alpine3.18
     container_name: $CONTAINER_WEB
     ports:
       - 8080:$NODE_PORT
@@ -23,7 +23,7 @@ services:
     working_dir: $WORKING_DIR
 
   db-service:
-    image: postgres:13.2
+    image: postgres:13.12-alpine3.18
     container_name: $CONTAINER_DB
     ports:
       - 5432:$DB_PORT
