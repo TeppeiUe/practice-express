@@ -1,89 +1,44 @@
 const express = require('express');
 const { check, crypto } = require('../services');
 const { WEB } = require('config');
+const ValidationError = require('../formats/ValidationError');
 
 /**
  * API: /login (POST), ログイン
+ * @param {express.Response} res
  * @param {express.Request} req
  * @param {callback} callback
  */
-module.exports.create = (req, callback) => {
-
+module.exports.create = (req, res, callback) => {
   let { email, password } = req.body;
-  let err_msg = [];
 
   try {
-    if (email === undefined) {
-      err_msg.push('email is undefined');
-    } else
-    if (check.is_empty(email)) {
-      err_msg.push('email is empty');
-    } else
-    if (!check.is_mail_address(email)) {
-      err_msg.push('email is not email format');
+    /** emailの検証 */
+    check.isRequired(email, 'email');
+    /** passwordの検証 */
+    check.isRequired(password, 'password');
+
+    // passwordのhash化
+    if (WEB.PASSWORD.SECURE) {
+      password = crypto.getHash(password);
     }
 
-    if (password === undefined) {
-      err_msg.push('password is undefined');
-    } else
-    if (check.is_empty(password)) {
-      err_msg.push('password is empty');
-    } else
-    if (!check.is_string(password)) {
-      err_msg.pash('password is not string');
-    }
-
-    if (err_msg.length) {
-      callback.failure(err_msg);
-    } else {
-      if (WEB.PASSWORD.SECURE) {
-        password = crypto.getHash(password);
-      }
-      callback.success({ email, password });
-    }
+    callback.success({ email, password });
 
   } catch (err) {
-    callback.error(err);
-
+    if (err instanceof ValidationError) {
+      callback.failure(err.message);
+    } else {
+      callback.error(err);
+    }
   }
-
 };
 
 
 /**
- * API: /logout (DELETE), ログアウト
- * @param {express.Request} req
- * @param {callback} callback
- */
-module.exports.delete = (req, callback) => {
-
-  const { session_id } = req.cookies;
-  let err_msg = [];
-
-  if (session_id === undefined) {
-    err_msg.push('cookie is not found');
-  }
-
-  if (err_msg.length) {
-    callback.failure(err_msg);
-  } else {
-    callback.success();
-  }
-
-};
-
-
-/**
- * callback関数定義
- * @typedef {object} callback
- * @prop {SuccessFunction} success
- * @prop {FailureFunction} failure
- * @prop {ErrorFunction} error
- */
-
-/**
- * callback関数メソッド
- * @typedef {function(object): ServerResponse} SuccessFunction
- * @typedef {function(string[]): ServerResponse} FailureFunction
- * @typedef {function(any): ServerResponse} ErrorFunction
+ * validationコールバック
+ * @callback callback
+ * @param {function(any): Promise<void>} success
+ * @param {function(string): void} failure
+ * @param {function(any): void} error
  */

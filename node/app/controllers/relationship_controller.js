@@ -1,9 +1,12 @@
 const express = require('express');
 const models = require('../models');
-const { Op } = models.Sequelize;
 const log = require('../logs');
 const { relation_validator } = require('../filters');
 const CommonResponse = require('../formats/CommonResponse');
+const UserBaseModel = require('../formats/UserBaseModel');
+const { DB } = require('config');
+const { attributes } = DB.USER_TABLE;
+const { order } = DB.COMMON_TABLE;
 
 /**
  * API: /user/:id/following (POST), フォロー
@@ -12,20 +15,11 @@ const CommonResponse = require('../formats/CommonResponse');
  * @param {express.NextFunction} next
  */
 module.exports.create = async (req, res, next) => {
-
   const callback = {
-    success: async ({ follow_id, user_id }) => {
+    success: async obj => {
       const [_, created] = await models.relationship.findOrCreate({
-        where: {
-          [Op.and] : [
-            { follow_id },
-            { user_id }
-          ]
-        },
-        defaults: {
-          follow_id,
-          user_id
-        }
+        where: obj,
+        defaults: obj,
       })
       .catch(err => {
         log.app.error(err);
@@ -35,20 +29,17 @@ module.exports.create = async (req, res, next) => {
       if (created) {
         res.status(204).end();
       } else {
-        next(new CommonResponse(400, ['already follow this user']));
+        next(new CommonResponse(400, 'already follow this user'));
       }
-
     },
-    failure: msg_list => next(new CommonResponse(400, msg_list)),
+    failure: msg => next(new CommonResponse(400, msg)),
     error: err => {
       log.app.error(err.stack);
       next(new CommonResponse);
-
     },
   };
 
-  relation_validator.create(req, callback);
-
+  relation_validator.create(req, res, callback);
 };
 
 
@@ -59,25 +50,21 @@ module.exports.create = async (req, res, next) => {
  * @param {express.NextFunction} next
  */
 module.exports.followings = async (req, res, next) => {
-
   const callback = {
-    success: async ({ id }) => {
-      const user = await models.user.findByPk(id, {
+    success: async ({ id, ...obj }) => {
+      const users = await models.user.findAll({
         include: {
           model: models.user,
-          as: 'following',
-          attributes: [
-            'id',
-            'user_name',
-            'profile',
-            'image',
-            'created_at'
-          ],
-          order: [
-            ['created_at', 'desc']
-          ],
+          as: 'follower',
+          attributes: [],
+          where: {
+            id,
+          }
         },
-        attributes: []
+        subQuery: false,
+        attributes,
+        order,
+        ...obj,
       })
       .catch(err => {
         log.app.error(err);
@@ -85,21 +72,17 @@ module.exports.followings = async (req, res, next) => {
       });
 
       res.json({
-        users: user.following.map(
-          ({ id, user_name, profile, image, created_at }) =>
-          ({ id, user_name, profile, image, created_at })
-        ),
+        users: users.map(user => new UserBaseModel(user)),
       });
     },
-    failure: msg_list => next(new CommonResponse(400, msg_list)),
+    failure: msg => next(new CommonResponse(400, msg)),
     error: err => {
       log.app.error(err.stack);
       next(new CommonResponse);
     },
   };
 
-  relation_validator.index(req, callback);
-
+  relation_validator.index(req, res, callback);
 }
 
 
@@ -110,25 +93,21 @@ module.exports.followings = async (req, res, next) => {
  * @param {express.NextFunction} next
  */
 module.exports.followers = async (req, res, next) => {
-
   const callback = {
-    success: async ({ id }) => {
-      const user = await models.user.findByPk(id, {
+    success: async ({ id, ...obj }) => {
+      const user = await models.user.findAll({
         include: {
           model: models.user,
-          as: 'follower',
-          attributes: [
-            'id',
-            'user_name',
-            'profile',
-            'image',
-            'created_at'
-          ],
-          order: [
-            ['created_at', 'desc']
-          ],
+          as: 'following',
+          attributes: [],
+          where: {
+            id,
+          },
         },
-        attributes: [],
+        subQuery: false,
+        attributes,
+        order,
+        ...obj,
       })
       .catch(err => {
         log.app.error(err);
@@ -136,22 +115,17 @@ module.exports.followers = async (req, res, next) => {
       });
 
       res.json({
-        users: user.follower.map(
-          ({ id, user_name, profile, image, created_at }) =>
-          ({ id, user_name, profile, image, created_at })
-        ),
+        users: user.map(user => new UserBaseModel(user)),
       });
-
     },
-    failure: msg_list => next(new CommonResponse(400, msg_list)),
+    failure: msg => next(new CommonResponse(400, msg)),
     error: err => {
       log.app.error(err.stack);
       next(new CommonResponse);
     },
   };
 
-  relation_validator.index(req, callback);
-
+  relation_validator.index(req, res, callback);
 }
 
 
@@ -161,17 +135,11 @@ module.exports.followers = async (req, res, next) => {
  * @param {express.Response} res
  * @param {express.NextFunction} next
  */
- module.exports.delete = async (req, res, next) => {
-
+module.exports.delete = async (req, res, next) => {
   const callback = {
-    success: async ({ follow_id, user_id }) => {
+    success: async obj => {
       const following = await models.relationship.destroy({
-        where: {
-          [Op.and]: [
-            { follow_id },
-            { user_id }
-          ]
-        }
+        where: obj,
       })
       .catch(err => {
         log.app.error(err.stack);
@@ -181,16 +149,15 @@ module.exports.followers = async (req, res, next) => {
       if (following) {
         res.status(204).end();
       } else {
-        next(new CommonResponse(400, ['cannot delete']));
+        next(new CommonResponse(400, 'cannot delete'));
       }
     },
-    failure: msg_list => next(new CommonResponse(400, msg_list)),
+    failure: msg => next(new CommonResponse(400, msg)),
     error: err => {
       log.app.error(err.stack);
       next(new CommonResponse);
     },
   };
 
-  relation_validator.delete(req, callback);
-
+  relation_validator.delete(req, res, callback);
 };

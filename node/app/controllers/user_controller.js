@@ -1,9 +1,14 @@
 const express = require('express');
 const models = require('../models');
 const log = require('../logs');
-const { user_validator } = require('../filters');
+const { user_validator, request } = require('../filters');
 const { session } = require('../services');
 const CommonResponse = require('../formats/CommonResponse');
+const UserBaseMode = require('../formats/UserBaseModel');
+const UserResponse = require('../formats/UserResponse');
+const { DB } = require('config');
+const { attributes } = DB.USER_TABLE;
+const { order } = DB.COMMON_TABLE;
 
 /**
  * API: /user, ユーザー登録
@@ -12,7 +17,6 @@ const CommonResponse = require('../formats/CommonResponse');
  * @param {express.NextFunction} next
  */
 module.exports.create = async (req, res, next) => {
-
   const callback = {
     success: async obj => {
       const user = await models.user.create(obj)
@@ -26,45 +30,27 @@ module.exports.create = async (req, res, next) => {
           if (err) {
             log.app.error(err);
             next(new CommonResponse);
-
           } else {
             const { session_id, expires } = ret;
-            const { id, user_name, image, profile, created_at } = user;
-
             session.setCookie(res, session_id, expires);
-
-            res.location('/user/' + id);
-
+            res.location(`/user/${user.id}`);
             res.status(201).json({
-              user: {
-                ...{
-                  id,
-                  user_name,
-                  image,
-                  profile,
-                  created_at
-                },
-                tweets: [],
-                favorites: [],
-              },
+              user: new UserBaseMode(user),
             });
-
           }
-
         })
       } else {
-        next(new CommonResponse(400, ['signup failure']));
+        next(new CommonResponse(400, 'signup failure'));
       }
     },
-    failure: msg_list => next(new CommonResponse(400, msg_list)),
+    failure: msg => next(new CommonResponse(400, msg)),
     error: err => {
       log.app.error(err.stack);
       next(new CommonResponse);
     },
   };
 
-  user_validator.create(req, callback);
-
+  user_validator.create(req, res, callback);
 };
 
 
@@ -75,86 +61,37 @@ module.exports.create = async (req, res, next) => {
  * @param {express.NextFunction} next
  */
 module.exports.show = async (req, res, next) => {
-
   const callback = {
-    success: async () => {
-      const user = await models.user.findByPk(req.params.id, {
+    success: async ({ id }) => {
+      const user = await models.user.findByPk(id, {
         include: {
           model: models.tweet,
-          attributes: [
-            'id',
-            'user_id',
-            'message',
-            'created_at'
-          ],
-          order: [
-            ['created_at', 'desc']
-          ],
+          order,
           include: {
             model: models.user,
             as: 'passive_favorite',
-            attributes: [
-              'id',
-              'user_name',
-              'image',
-              'profile'
-            ],
-            order: [
-              ['created_at', 'desc']
-            ],
+            order,
           },
         },
-        attributes: [
-          'id',
-          'user_name',
-          'image',
-          'profile',
-          'created_at'
-        ],
+        attributes,
       })
       .catch(err => {
         log.app.error(err.stack);
         next(new CommonResponse);
       });
 
-      const { id, user_name, image, profile, created_at, tweets } = user;
-
       res.json({
-        user: {
-          ...{
-            id,
-            user_name,
-            image,
-            profile,
-            created_at
-          },
-          tweets: tweets.map(
-            ({ id, user_id, message, created_at, passive_favorite }) => ({
-              ...{
-                id,
-                user_id,
-                message,
-                created_at
-              },
-              favorites: passive_favorite.map(
-                ({ id, user_name, image, profile }) =>
-                ({ id, user_name, image, profile })
-              ),
-            })
-          ).sort((p, c) => p.created_at < c.created_at ? 1 : -1),
-        },
+        user: new UserResponse(user),
       });
-
     },
-    failure: msg_list => next(new CommonResponse(400, msg_list)),
+    failure: msg => next(new CommonResponse(400, msg)),
     error: err => {
       log.app.error(err.stack);
       next(new CommonResponse);
     },
   };
 
-  user_validator.show(req, callback);
-
+  user_validator.show(req, res, callback);
 };
 
 
@@ -165,14 +102,13 @@ module.exports.show = async (req, res, next) => {
  * @param {express.NextFunction} next
  */
 module.exports.update = async (req, res, next) => {
-
   const callback = {
     success: async obj => {
+      const { id } = res.locals.user;
+
       await models.user.update(
         obj, {
-        where: {
-          id: req.current_user.id
-        },
+        where: { id },
       })
       .catch(err => {
         log.app.error(err.stack);
@@ -180,18 +116,15 @@ module.exports.update = async (req, res, next) => {
       });
 
       res.status(204).end();
-
     },
-    failure: msg_list => next(new CommonResponse(400, msg_list)),
+    failure: msg => next(new CommonResponse(400, msg)),
     error: err => {
       log.app.error(err.stack);
       next(new CommonResponse);
-
     },
   };
 
-  user_validator.update(req, callback);
-
+  user_validator.update(req, res, callback);
 };
 
 
@@ -202,24 +135,28 @@ module.exports.update = async (req, res, next) => {
  * @param {express.NextFunction} next
  */
 module.exports.index = async (req, res, next) => {
+  const callback = {
+    success: async obj => {
+      const users = await models.user.findAll({
+        attributes,
+        ...obj,
+        order,
+      })
+      .catch(err => {
+        log.app.error(err.stack);
+        next(new CommonResponse);
+      });
 
-  const users = await models.user.findAll({
-    attributes: [
-      'id',
-      'user_name',
-      'image',
-      'profile',
-      'created_at'
-    ],
-    order: [
-      ['created_at', 'desc']
-    ]
-  })
-  .catch(err => {
-    log.app.error(err.stack);
-    next(new CommonResponse);
-  });
+      res.json({
+        users: users.map(user => new UserBaseMode(user)),
+      });
+    },
+    failure: msg => next(new CommonResponse(400, msg)),
+    error: err => {
+      log.app.error(err.stack);
+      next(new CommonResponse);
+    },
+  };
 
-  res.json({ users });
-
+  request.index(req, res, callback);
 };

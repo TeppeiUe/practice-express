@@ -1,10 +1,12 @@
 const express = require('express');
 const models = require('../models');
-const { Op } = models.Sequelize;
 const log = require('../logs');
 const { session }  = require('../services');
 const { session_validator } = require('../filters');
 const CommonResponse = require('../formats/CommonResponse');
+const UserBaseMode = require('../formats/UserBaseModel');
+const { DB } = require('config');
+const { attributes } = DB.USER_TABLE;
 
 /**
  * API: /login (POST), ログイン
@@ -13,68 +15,11 @@ const CommonResponse = require('../formats/CommonResponse');
  * @param {express.NextFunction} next
  */
 module.exports.create = async (req, res, next) => {
-
   const callback = {
-    success: async ({ email, password }) => {
+    success: async obj => {
       const user = await models.user.findOne({
-        include: [
-          {
-            model: models.user,
-            as: 'following',
-            attributes: [
-              'id',
-              'user_name',
-              'profile',
-              'image',
-              'created_at'
-            ],
-            include: {
-              model: models.tweet,
-              include: {
-                model: models.user,
-                as: 'passive_favorite',
-                attributes: [
-                  'id',
-                  'user_name',
-                  'image',
-                  'profile'
-                ],
-              },
-            },
-          },
-          {
-            model: models.tweet,
-            include: {
-              model: models.user,
-              as: 'passive_favorite',
-              attributes: [
-                'id',
-                'user_name',
-                'image',
-                'profile'
-              ],
-            },
-            attributes: [
-              'id',
-              'user_id',
-              'message',
-              'created_at'
-            ],
-          },
-        ],
-        where: {
-          [Op.and]: [
-            { email },
-            { password }
-          ]
-        },
-        attributes: [
-          'id',
-          'user_name',
-          'image',
-          'profile',
-          'created_at'
-        ]
+        where: obj,
+        attributes,
       })
       .catch(err => {
         log.app.error(err.stack);
@@ -83,89 +28,29 @@ module.exports.create = async (req, res, next) => {
 
       if (user) {
         await session.create(user.id, async (ret, err) => {
-
           if (err) {
             log.app.error(err);
             next(new CommonResponse);
-
           } else {
             const { session_id, expires } = ret;
-            session.setCookie(res, session_id, expires)
-
-            const {
-              id,
-              user_name,
-              image,
-              profile,
-              created_at,
-              following,
-            } = user;
-
-            const user_tweets = user.tweets.reduce((arr, t) => [
-              ...arr, {
-                id: t.id,
-                user_id: t.user_id,
-                message: t.message,
-                created_at: t.created_at,
-                favorites: t.passive_favorite.map(u => ({
-                  id: u.id,
-                  user_name: u.user_name,
-                  image: u.image,
-                  profile: u.profile
-                })),
-                user: { id, user_name, image, profile },
-              }
-            ], []);
-
+            session.setCookie(res, session_id, expires);
             res.json({
-              user: {
-                ...{
-                  id,
-                  user_name,
-                  image,
-                  profile,
-                  created_at
-                },
-                tweets: following
-                  .filter(({ tweets }) => tweets.length)
-                  .reduce((arr, { id, user_name, image, tweets }) => [
-                    ...arr, ...tweets.map(t => {
-                      return {
-                        id: t.id,
-                        user_id: t.user_id,
-                        message: t.message,
-                        created_at: t.created_at,
-                        favorites: t.passive_favorite.map(u => ({
-                          id: u.id,
-                          user_name: u.user_name,
-                          image: u.image,
-                          profile: u.profile
-                        })),
-                        user: { id, user_name, image, profile },
-                      }
-                    })
-                  ], user_tweets)
-                  .sort((p, c) => p.created_at < c.created_at ? 1 : -1),
-              },
+              user: new UserBaseMode(user),
             });
-
           }
-
         })
       } else {
-        next(new CommonResponse(401, ['user is not found']));
-
+        next(new CommonResponse(401, 'user is not found'));
       }
     },
-    failure: msg_list => next(new CommonResponse(401, msg_list)),
+    failure: msg => next(new CommonResponse(401, msg)),
     error: err => {
       log.app.error(err.stack);
       next(new CommonResponse);
     },
   };
 
-  session_validator.create(req, callback);
-
+  session_validator.create(req, res, callback);
 };
 
 
@@ -176,128 +61,11 @@ module.exports.create = async (req, res, next) => {
  * @param {express.NextFunction} next
  */
 module.exports.search = async (req, res, next) => {
+  const { user } = res.locals;
 
-  const user = await models.user.findByPk(req.current_user.id, {
-    include: [
-      {
-        model: models.user,
-        as: 'following',
-        attributes: [
-          'id',
-          'user_name',
-          'profile',
-          'image',
-          'created_at'
-        ],
-        include: {
-          model: models.tweet,
-          include: {
-            model: models.user,
-            as: 'passive_favorite',
-            attributes: [
-              'id',
-              'user_name',
-              'image',
-              'profile'
-            ],
-          },
-        },
-      },
-      {
-        model: models.tweet,
-        include: {
-          model: models.user,
-          as: 'passive_favorite',
-          attributes: [
-            'id',
-            'user_name',
-            'image',
-            'profile'
-          ],
-        },
-        attributes: [
-          'id',
-          'user_id',
-          'message',
-          'created_at'
-        ],
-      }
-    ],
-    attributes: [
-      'id',
-      'user_name',
-      'image',
-      'profile',
-      'created_at'
-    ],
-  })
-  .catch(err => {
-    log.app.error(err.stack);
-    next(new CommonResponse);
+  res.json({
+    user: new UserBaseMode(user),
   });
-
-  if (user) {
-    const {
-      id,
-      user_name,
-      image,
-      profile,
-      created_at,
-      following,
-    } = user;
-
-    const user_tweets = user.tweets.reduce((arr, t) => [
-      ...arr, {
-        id: t.id,
-        user_id: t.user_id,
-        message: t.message,
-        created_at: t.created_at,
-        favorites: t.passive_favorite.map(u => ({
-          id: u.id,
-          user_name: u.user_name,
-          image: u.image,
-          profile: u.profile
-        })),
-        user: { id, user_name, image, profile },
-      }
-    ], []);
-
-    res.json({
-      user: {
-        ...{
-          id,
-          user_name,
-          image,
-          profile,
-          created_at
-        },
-        tweets: following
-          .filter(({ tweets }) => tweets.length)
-          .reduce((arr, { id, user_name, image, tweets }) => [
-            ...arr, ...tweets.map(t => {
-              return {
-                id: t.id,
-                user_id: t.user_id,
-                message: t.message,
-                created_at: t.created_at,
-                favorites: t.passive_favorite.map(u => ({
-                  id: u.id,
-                  user_name: u.user_name,
-                  image: u.image,
-                  profile: u.profile
-                })),
-                user: { id, user_name, image, profile },
-              }
-            })
-          ], user_tweets)
-          .sort((p, c) => p.created_at < c.created_at ? 1 : -1),
-      },
-    });
-
-  } else {
-    next(new CommonResponse(401, ['user is not found']));
-  }
-
 };
 
 
@@ -308,29 +76,13 @@ module.exports.search = async (req, res, next) => {
  * @param {express.NextFunction} next
  */
 module.exports.delete = async (req, res, next) => {
-
-  const callback = {
-    success: async () => {
-      await session.delete(req.cookies.session_id, (ret, err) => {
-        if (err) {
-          log.app.error(err);
-          next(new CommonResponse);
-
-        } else {
-          session.crearCookie(res);
-          res.status(204).end();
-
-        }
-
-      });
-    },
-    failure: msg_list => next(new CommonResponse(401, msg_list)),
-    error: err => {
+  await session.delete(req.cookies.session_id, (_, err) => {
+    if (err) {
       log.app.error(err.stack);
       next(new CommonResponse);
-    },
-  };
-
-  session_validator.delete(req, callback);
-
+    } else {
+      session.crearCookie(res);
+      res.status(204).end();
+    }
+  });
 };

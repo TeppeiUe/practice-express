@@ -9,7 +9,7 @@ servers:
   - url: 'http://localhost:3000'
     description: local
 
-tags: 
+tags:
   - name: session
     x-displayName: セッション管理
     description: セッション関連のAPI群
@@ -25,20 +25,20 @@ tags:
   - name: favorite
     x-displayName: お気に入り機能
     description: お気に入り関連のデータを扱うAPI群
-  
+
 paths:
 # -----------------------------------------------------------------------------
 # セッション管理API
 # -----------------------------------------------------------------------------
   /session:
-    post:  
+    post:
       summary: セッション確認
       description: |
         セッションの有効性を確認するAPI<br>
         有効である場合Cookieの更新とユーザ基本情報を返却
       tags:
         - session
-      depricated: false
+      deprecated: false
 
       parameters:
         - $ref: '#/components/parameters/session_id'
@@ -53,19 +53,22 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
+                type: object
+                properties:
+                  user:
+                    $ref: '#/components/schemas/UserBase'
         '401':
           $ref: '#/components/responses/401'
         '500':
           $ref: '#/components/responses/500'
-  
+
   /login:
-    post:  
+    post:
       summary: ログイン
       description: ログインAPI
       tags:
         - session
-      depricated: false
+      deprecated: false
 
       requestBody:
         content:
@@ -80,7 +83,7 @@ paths:
               required:
                 - email
                 - password
-      
+
       responses:
         '200':
           x-summary: Ok
@@ -91,23 +94,26 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
+                type: object
+                properties:
+                  user:
+                    $ref: '#/components/schemas/UserBase'
         '401':
           $ref: '#/components/responses/401'
         '500':
           $ref: '#/components/responses/500'
-    
+
   /logout:
-    delete:  
+    delete:
       summary: ログアウト
       description: ログアウトAPI
       tags:
         - session
-      depricated: false
+      deprecated: false
 
       parameters:
         - $ref: '#/components/parameters/session_id'
-      
+
       responses:
         '204':
           $ref: '#/components/responses/204'
@@ -125,12 +131,12 @@ paths:
 # ユーザ機能API
 # -----------------------------------------------------------------------------
   /user:
-    post:  
+    post:
       summary: ユーザ登録
       description: ユーザ登録API
       tags:
         - user
-      depricated: false
+      deprecated: false
 
       requestBody:
         content:
@@ -148,41 +154,40 @@ paths:
                 - user_name
                 - email
                 - password
-      
+
       responses:
         '201':
           description: Created
           headers:
             Set-Cookie:
               $ref: '#/components/headers/set-cookie'
+            Location:
+              description: user detail url
+              schema:
+                type: string
+                example: /user/2
+
           content:
             application/json:
               schema:
-               type: object
-               properties:
-                user:
-                  type: object
-                  allOf:
-                    - $ref: '#/components/schemas/UserBase'
-                    - schema:
-                      type: object
-                      properties:
-                        tweets:
-                          type: array
-        
+                type: object
+                properties:
+                  user:
+                    $ref: '#/components/schemas/UserBase'
+
         '401':
           $ref: '#/components/responses/401'
         '500':
           $ref: '#/components/responses/500'
-  
-    put:  
+
+    put:
       summary: ユーザ更新
       description: |
         ユーザ更新API<br>
         本APIで更新可能な要素は、user_name, profile及びimage
       tags:
         - user
-      depricated: false
+      deprecated: false
 
       parameters:
         - $ref: '#/components/parameters/session_id'
@@ -203,7 +208,7 @@ paths:
                 - user_name
                 - profile
                 - image
-      
+
       responses:
         '204':
           $ref: '#/components/responses/204'
@@ -213,15 +218,19 @@ paths:
           $ref: '#/components/responses/401'
         '500':
           $ref: '#/components/responses/500'
-    
+
   /users:
     get:
       summary: ユーザ一覧取得
       description: ユーザ一覧取得API
       tags:
         - user
-      depricated: false
-      
+      deprecated: false
+
+      parameters:
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/limit'
+
       responses:
         '200':
           x-summary: Ok
@@ -245,11 +254,11 @@ paths:
       description: ユーザ詳細取得API
       tags:
         - user
-      depricated: false
+      deprecated: false
 
       parameters:
         - $ref: '#/components/parameters/user_id'
-      
+
       responses:
         '200':
           x-summary: Ok
@@ -257,7 +266,11 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
+                type: object
+                properties:
+                  user:
+                    description: ユーザ詳細情報
+                    $ref: '#/components/schemas/UserResponse'
         '400':
           $ref: '#/components/responses/400'
         '500':
@@ -268,12 +281,12 @@ paths:
 # -----------------------------------------------------------------------------
 
   /tweet:
-    post:  
+    post:
       summary: ツイート
       description: ツイートAPI
       tags:
         - tweet
-      depricated: false
+      deprecated: false
 
       parameters:
         - $ref: '#/components/parameters/session_id'
@@ -288,7 +301,7 @@ paths:
                   $ref: '#/components/schemas/tweet/message'
               required:
                 - message
-      
+
       responses:
         '201':
           x-summary: Created
@@ -298,10 +311,19 @@ paths:
           headers:
             Set-Cookie:
               $ref: '#/components/headers/set-cookie'
+            Location:
+              description: tweet detail url
+              schema:
+                type: string
+                example: /tweet/3
+
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Tweet'
+                type: object
+                properties:
+                  tweet:
+                    $ref: '#/components/schemas/TweetBase'
         '400':
           $ref: '#/components/responses/400'
         '401':
@@ -315,8 +337,12 @@ paths:
       description: ツイート一覧取得API
       tags:
         - tweet
-      depricated: false
-      
+      deprecated: false
+
+      parameters:
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/limit'
+
       responses:
         '200':
           x-summary: Ok
@@ -330,7 +356,40 @@ paths:
                     description: ツイートリスト
                     type: array
                     items:
-                      $ref: '#/components/schemas/Tweet'
+                      $ref: '#/components/schemas/TweetResponse'
+        '500':
+          $ref: '#/components/responses/500'
+
+  /tweets/user:
+    get:
+      summary: ツイート一覧（ログインユーザ）
+      description: |
+        ログインユーザとフォロワーのツイート一覧を返却
+      tags:
+        - tweet
+      deprecated: false
+
+      parameters:
+        - $ref: '#/components/parameters/session_id'
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/limit'
+
+      responses:
+        '200':
+          x-summary: Ok
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  tweets:
+                    description: ツイートリスト
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/TweetResponse'
+        '401':
+          $ref: '#/components/responses/401'
         '500':
           $ref: '#/components/responses/500'
 
@@ -340,11 +399,11 @@ paths:
       description: ツイート詳細取得API
       tags:
         - tweet
-      depricated: false
+      deprecated: false
 
       parameters:
         - $ref: '#/components/parameters/tweet_id'
-      
+
       responses:
         '200':
           x-summary: Ok
@@ -352,23 +411,26 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Tweet'
+                type: object
+                properties:
+                  tweet:
+                    $ref: '#/components/schemas/TweetResponse'
         '400':
           $ref: '#/components/responses/400'
         '500':
           $ref: '#/components/responses/500'
-  
+
     delete:
       summary: ツイート削除
       description: ツイート削除API
       tags:
         - tweet
-      depricated: false
+      deprecated: false
 
       parameters:
         - $ref: '#/components/parameters/tweet_id'
         - $ref: '#/components/parameters/session_id'
-      
+
       responses:
         '204':
           $ref: '#/components/responses/204'
@@ -384,17 +446,17 @@ paths:
 # -----------------------------------------------------------------------------
 
   /user/{user_id}/following:
-    post:  
+    post:
       summary: フォロー登録
       description: フォロー登録API
       tags:
         - follow
-      depricated: false
+      deprecated: false
 
       parameters:
         - $ref: '#/components/parameters/user_id'
         - $ref: '#/components/parameters/session_id'
-      
+
       responses:
         '204':
           $ref: '#/components/responses/204'
@@ -410,12 +472,12 @@ paths:
       description: フォロー削除API
       tags:
         - follow
-      depricated: false
+      deprecated: false
 
       parameters:
         - $ref: '#/components/parameters/user_id'
         - $ref: '#/components/parameters/session_id'
-      
+
       responses:
         '204':
           $ref: '#/components/responses/204'
@@ -427,13 +489,17 @@ paths:
           $ref: '#/components/responses/500'
 
   /user/{user_id}/followings:
-    get:  
+    get:
       summary: フォロー一覧取得
       description: フォロー一覧取得API
       tags:
         - follow
-      depricated: false
-      
+      deprecated: false
+
+      parameters:
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/limit'
+
       responses:
         responses:
         '200':
@@ -453,15 +519,19 @@ paths:
           $ref: '#/components/responses/400'
         '500':
           $ref: '#/components/responses/500'
-  
+
   /user/{user_id}/followers:
-    get:  
+    get:
       summary: フォロワー一覧取得
       description: フォロワー一覧取得API
       tags:
         - follow
-      depricated: false
-      
+      deprecated: false
+
+      parameters:
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/limit'
+
       responses:
         responses:
         '200':
@@ -492,12 +562,12 @@ paths:
       description: お気に入り登録API
       tags:
         - favorite
-      depricated: false
+      deprecated: false
 
       parameters:
         - $ref: '#/components/parameters/tweet_id'
         - $ref: '#/components/parameters/session_id'
-      
+
       responses:
         '204':
           $ref: '#/components/responses/204'
@@ -513,12 +583,12 @@ paths:
       description: お気に入り削除API
       tags:
         - favorite
-      depricated: false
+      deprecated: false
 
       parameters:
         - $ref: '#/components/parameters/tweet_id'
         - $ref: '#/components/parameters/session_id'
-      
+
       responses:
         '204':
           $ref: '#/components/responses/204'
@@ -530,13 +600,17 @@ paths:
           $ref: '#/components/responses/500'
 
   /user/{user_id}/favorites::
-    get:  
+    get:
       summary: お気に入り一覧取得
       description: お気に入り一覧取得API
       tags:
         - favorite
-      depricated: false
-      
+      deprecated: false
+
+      parameters:
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/limit'
+
       responses:
         responses:
         '200':
@@ -551,7 +625,7 @@ paths:
                     description: お気に入りツイートリスト
                     type: array
                     items:
-                      $ref: '#/components/schemas/Tweet'
+                      $ref: '#/components/schemas/TweetResponse'
         '400':
           $ref: '#/components/responses/400'
         '500':
@@ -578,9 +652,23 @@ components:
       in: cookie
       description: session_id
       required: true
-      schema: 
+      schema:
         type: string
       example: IqVkiav4jiI%3D
+    limit:
+      name: limit
+      in: query
+      description: limit
+      schema:
+        type: integer
+        default: 50
+    offset:
+      name: offset
+      in: query
+      description: offset
+      schema:
+        type: integer
+        default: 0
 
   schemas:
     # users table
@@ -621,13 +709,13 @@ components:
         description: |
           メッセージ（140文字以内）
         example: Hello Express!
-      
+
     # shared columns
     created_at:
       type: string
       description: 作成日時
       example: '2023-06-21T13:58:37.501Z'
-    
+
     # shared object
     UserBase:
       description: ユーザ基本情報
@@ -643,8 +731,9 @@ components:
           $ref: '#/components/schemas/user/image'
         created_at:
           $ref: '#/components/schemas/created_at'
-    
+
     TweetBase:
+      description: ツイート基本情報
       type: object
       properties:
         id:
@@ -655,8 +744,8 @@ components:
           $ref: '#/components/schemas/tweet/message'
         created_at:
           $ref: '#/components/schemas/created_at'
-    
-    User:
+
+    UserResponse:
       type: object
       allOf:
         - $ref: '#/components/schemas/UserBase'
@@ -664,29 +753,32 @@ components:
           type: object
           properties:
             tweets:
-              description: ツイートリスト
+              description: ユーザツイートリスト
               type: array
               items:
-                type: object
-                allOf:
-                  - $ref: '#/components/schemas/TweetBase'
-                  - schema:
-                    type: object
-                    properties:
-                      favoritets:
-                        description: お気に入りした人リスト
-                        type: array
-                        items:
-                          $ref: '#/components/schemas/UserBase'
-    
-    Tweet:
+                $ref: '#/components/schemas/UserTweetItem'
+
+    UserTweetItem:
       type: object
       allOf:
         - $ref: '#/components/schemas/TweetBase'
         - schema:
           type: object
           properties:
-            favoritets:
+            favorites:
+              description: お気に入りした人リスト
+              type: array
+              items:
+                $ref: '#/components/schemas/UserBase'
+
+    TweetResponse:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/TweetBase'
+        - schema:
+          type: object
+          properties:
+            favorites:
               description: お気に入りした人リスト
               type: array
               items:
@@ -701,7 +793,7 @@ components:
       schema:
         type: string
         example: session_id=IqVkiav4jiI%3D; Path=/; Expires=Sat, 02 Sep 2023 19:22:04 GMT; HttpOnly; SameSite=Lax
-  
+
   responses:
     '204':
       x-summary: No Content
@@ -709,7 +801,7 @@ components:
       headers:
         Set-Cookie:
           $ref: '#/components/headers/set-cookie'
-    
+
     '400':
       x-summary: Bad Request
       description: Bad Request
@@ -724,7 +816,7 @@ components:
                 items:
                   type: string
                   example: 'email is required'
-    
+
     '401':
       x-summary: Unauthorized
       description: Unauthorized
@@ -739,7 +831,7 @@ components:
                 items:
                   type: string
                   example: 'user is not found'
-    
+
     '500':
       x-summary: Internal Server Error
       description: Unexpected Error
@@ -753,5 +845,4 @@ components:
                 type: array
                 items:
                   type: string
-                  example: 'system error'
-    
+                  example: 'unexpected error'

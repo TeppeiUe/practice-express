@@ -1,9 +1,12 @@
 const express = require('express');
 const models = require('../models');
-const { Op } = models.Sequelize;
 const log = require('../logs');
 const { favorite_validator } = require('../filters');
 const CommonResponse = require('../formats/CommonResponse');
+const TweetResponse = require('../formats/TweetResponse');
+const { DB } = require('config');
+const { attributes } = DB.USER_TABLE;
+const { order } = DB.COMMON_TABLE;
 
 /**
  * API: /tweet/:id/favorite (POST), お気に入り登録
@@ -12,20 +15,11 @@ const CommonResponse = require('../formats/CommonResponse');
  * @param {express.NextFunction} next
  */
 module.exports.create = async (req, res, next) => {
-
   const callback = {
-    success: async ({ user_id, tweet_id }) => {
+    success: async obj => {
       await models.favorite.findOrCreate({
-        where: {
-          [Op.and]: [
-            { user_id },
-            { tweet_id }
-          ]
-        },
-        defaults: {
-          user_id,
-          tweet_id
-        }
+        where: obj,
+        defaults: obj,
       })
       .catch(err => {
         log.app.error(err.stack);
@@ -33,17 +27,15 @@ module.exports.create = async (req, res, next) => {
       });
 
       res.status(204).end();
-
     },
-    failure: msg_list => next(new CommonResponse(400, msg_list)),
+    failure: msg => next(new CommonResponse(400, msg)),
     error: err => {
       log.app.error(err.stack);
       next(new CommonResponse);
     },
   };
 
-  favorite_validator.create(req, callback);
-
+  favorite_validator.create(req, res, callback);
 };
 
 
@@ -54,82 +46,49 @@ module.exports.create = async (req, res, next) => {
  * @param {express.NextFunction} next
  */
 module.exports.index = async (req, res, next) => {
-
   const callback = {
-    success: async ({ id }) => {
-      const favorites = await models.user.findByPk(id, {
+    success: async ({ id, ...obj }) => {
+      const favorites = await models.favorite.findOne({
         include: {
           model: models.tweet,
-          as: 'active_favorite',
-          attributes: [
-            'id',
-            'message',
-            'user_id',
-            'created_at'
-          ],
-          order: [
-            ['created_at', 'desc']
-          ],
           include: [
             {
               model: models.user,
-              attributes: [
-                'id',
-                'user_name',
-                'image',
-                'profile'
-              ],
+              attributes,
             }, {
               model: models.user,
               as: 'passive_favorite',
-              attributes: [
-                'id',
-                'user_name',
-                'image',
-                'profile'
-              ],
-              order: [
-                ['created_at', 'desc']
-              ],
+              attributes,
+              order,
             },
           ],
         },
+        where: {
+          user_id: id
+        },
+        order,
+        ...obj,
       })
       .catch(err => {
         log.app.error(err.stack);
         next(new CommonResponse);
       });
 
-      const { active_favorite } = favorites;
-
       res.json({
-        tweets: active_favorite.map(
-          ({ id, user_id, message, created_at, user, passive_favorite }) => ({
-            ...{
-              id,
-              user_id,
-              message,
-              created_at,
-              user,
-            },
-            favorites: passive_favorite.map(
-              ({ id, user_name, image, profile }) =>
-              ({ id, user_name, image, profile })
-            ),
-          })
-        ),
+        tweets: favorites
+          ? favorites.tweets.map(tweet => new TweetResponse(tweet))
+          : [],
       });
 
     },
-    failure: msg_list => next(new CommonResponse(400, msg_list)),
+    failure: msg => next(new CommonResponse(400, msg)),
     error: err => {
       log.app.error(err.stack);
       next(new CommonResponse);
     },
   };
 
-  favorite_validator.index(req, callback);
-
+  favorite_validator.index(req, res, callback);
 }
 
 
@@ -140,16 +99,10 @@ module.exports.index = async (req, res, next) => {
  * @param {express.NextFunction} next
  */
 module.exports.delete = async (req, res, next) => {
-
   const callback = {
-    success: async ({ user_id, tweet_id }) => {
+    success: async obj => {
       const favorite = await models.favorite.destroy({
-        where: {
-          [Op.and]: [
-            { user_id },
-            { tweet_id }
-          ]
-        }
+        where: obj,
       })
       .catch(err => {
         log.app.error(err.stack);
@@ -159,17 +112,15 @@ module.exports.delete = async (req, res, next) => {
       if (favorite) {
         res.status(204).end();
       } else {
-        next(new CommonResponse(400, ['favorite tweet is not found']));
+        next(new CommonResponse(400, 'favorite tweet is not found'));
       }
-
     },
-    failure: msg_list => next(new CommonResponse(400, msg_list)),
+    failure: msg => next(new CommonResponse(400, msg)),
     error: err => {
       log.app.error(err.stack);
       next(new CommonResponse);
     },
   };
 
-  favorite_validator.delete(req, callback);
-
+  favorite_validator.delete(req, res, callback);
 };

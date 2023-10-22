@@ -1,131 +1,120 @@
 const express = require('express');
 const { check } = require('../services');
-
+const { tweet } = require('../models');
+const ValidationError = require('../formats/ValidationError');
+const { DB } = require('config');
+const { LIMIT, OFFSET } = DB.COMMON_TABLE;
 
 /**
  * API: /tweet/:id/favorite (POST), お気に入り登録
+ * @param {express.Response} res
  * @param {express.Request} req
  * @param {callback} callback
  */
- module.exports.create = async (req, callback) => {
-
+ module.exports.create = async (req, res, callback) => {
   const tweet_id = req.params.id;
-  let err_msg = [];
+  const user_id = res.locals.user.id;
 
   try {
-    if (tweet_id === undefined) {
-      err_msg.push('tweet_id is undefined');
-    } else
-    if (check.is_empty(tweet_id)) {
-      err_msg.push('tweet_id is empty');
-    } else
-    if (!check.is_positive_integer(tweet_id)) {
-      err_msg.push('tweet_id is not positive integer');
-    } else
-    if (!(await check.tweet_exist(tweet_id))) {
-      err_msg.push('tweet is not found');
-    }
+    /** path parameterの検証 */
+    check.pathParameter(tweet_id);
+    // 対象tweetの存在チェック
+    await tweet.findByPk(tweet_id)
+    .then(t => {
+      if (!t) {
+        throw new ValidationError('tweet is not found');
+      }
+    });
 
-    if (err_msg.length) {
-      callback.failure(err_msg);
-    } else {
-      callback.success({
-        user_id: req.current_user.id,
-        ...{ tweet_id }
-      });
-    }
+    callback.success({
+      user_id,
+      tweet_id,
+    });
 
   } catch (err) {
-    callback.error(err);
-
+    if (err instanceof ValidationError) {
+      callback.failure(err.message);
+    } else {
+      callback.error(err);
+    }
   }
-
 };
 
 
 /**
  * API: /user/:id/favorites , お気に入りツイート一覧
+ * @param {express.Response} res
  * @param {express.Request} req
  * @param {callback} callback
  */
- module.exports.index = (req, callback) => {
-
+ module.exports.index = (req, res, callback) => {
   const { id } = req.params;
-  let err_msg = [];
+  let { limit, offset } = req.query;
 
   try {
-    if (id === undefined) {
-      err_msg.push('user_id is undefined');
-    } else
-    if (check.is_empty(id)) {
-      err_msg.push('user_id is empty');
-    } else
-    if (!check.is_positive_integer(id)) {
-      err_msg.push('user_id is not positive integer');
+    /** path parameterの検証 */
+    check.pathParameter(id);
+
+    /** limitの検証 */
+    check.queryOption(limit, 'limit');
+    if (limit === undefined) {
+      limit = LIMIT;
     }
 
-    if (err_msg.length) {
-      callback.failure(err_msg);
-    } else {
-      callback.success({ id });
+    /** offsetの検証 */
+    check.queryOption(offset, 'offset');
+    if (offset === undefined) {
+      offset = OFFSET;
     }
+
+    callback.success({
+      id,
+      limit,
+      offset,
+    });
 
   } catch (err) {
-    callback.error(err);
-
+    if (err instanceof ValidationError) {
+      callback.failure(err.message);
+    } else {
+      callback.error(err);
+    }
   }
-
 };
 
 
 /**
  * API: /tweet/:id/favorite (DELETE), お気に入り削除
+ * @param {express.Response} res
  * @param {express.Request} req
  * @param {callback} callback
  */
- module.exports.delete = (req, callback) => {
-
+ module.exports.delete = (req, res, callback) => {
   const tweet_id = req.params.id;
-  let err_msg = [];
+  const user_id = res.locals.user.id;
 
   try {
-    if (tweet_id === undefined) {
-      err_msg.push('tweet_id is undefined');
-    } else
-    if (check.is_empty(tweet_id)) {
-      err_msg.push('tweet_id is empty');
-    } else
-    if (!check.is_positive_integer(tweet_id)) {
-      err_msg.push('tweet_id is not positive integer');
-    }
+    /** path parameterの検証 */
+    check.pathParameter(tweet_id);
 
-    if (err_msg.length) {
-      callback.failure(err_msg);
-    } else {
-      callback.success({
-        user_id: req.current_user.id,
-        ...{ tweet_id }
-      });
-    }
+    callback.success({
+      user_id,
+      tweet_id,
+    });
 
   } catch (err) {
-    callback.error(err);
-
+    if (err instanceof ValidationError) {
+      callback.failure(err.message);
+    } else {
+      callback.error(err);
+    }
   }
-
 };
 
 /**
- * callback関数定義
- * @typedef {object} callback
- * @prop {SuccessFunction} success
- * @prop {FailureFunction} failure
- * @prop {ErrorFunction} error
- */
-
-/**
- * callback関数メソッド
- * @typedef {function(object): ServerResponse} SuccessFunction
- * @typedef {function(string[]): ServerResponse} FailureFunction
- * @typedef {function(any): ServerResponse} ErrorFunction
+ * validationコールバック
+ * @callback callback
+ * @param {function(any): Promise<void>} success
+ * @param {function(string): void} failure
+ * @param {function(any): void} error
  */
